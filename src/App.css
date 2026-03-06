@@ -92,7 +92,7 @@ button{
 
 .topBar{
   display:flex;
-  justify-content:flex-end;
+  justify-content:flex-start;
   padding:10px 30px;
   border-bottom:1px solid #38444d;
 }
@@ -107,3 +107,50 @@ button{
   cursor:pointer;
   text-align: left;
 }
+
+/* NAVITEM */
+.navItem{
+  display:block;
+  margin:15px 0;
+  cursor:pointer;
+  color:white;
+  text-decoration:none;
+  font-size:18px;
+  padding:6px 10px;
+  border-radius:20px;
+}
+
+.navItem:hover{
+  background:#1e2732;
+  color:#1d9bf0;
+}
+
+.navItem.active{
+  font-weight:bold;
+  color:#1d9bf0;
+}
+
+/* POST FOOTER */
+
+/* .postFooter{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+  font-size:12px;
+  opacity:.8;
+} */
+
+/* .deleteButton{
+  background:#e0245e;
+  border:none;
+  padding:4px 10px;
+  border-radius:15px;
+  color:white;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.deleteButton:hover{
+  opacity:.85;
+} */

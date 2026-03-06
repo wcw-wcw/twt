@@ -1,14 +1,14 @@
 import PostComposer from "../components/posts/PostComposer"
 import Timeline from "../components/posts/Timeline"
 
-function Home({ posts, addPost }) {
+function Home({ posts, addPost, deletePost}) {
 
   return (
     <div>
 
       <PostComposer onPost={addPost} />
 
-      <Timeline posts={posts} />
+      <Timeline posts={posts} onDelete={deletePost}/>
 
     </div>
   )

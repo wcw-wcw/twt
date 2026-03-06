@@ -1,6 +1,6 @@
 import Post from "./Post"
 
-function Timeline({ posts }) {
+function Timeline({ posts, onDelete }) {
 
   return (
     <div className="timeline">
@@ -10,7 +10,11 @@ function Timeline({ posts }) {
       )}
 
       {posts.map(post => (
-        <Post key={post.id} post={post} />
+        <Post
+          key={post.id}
+          post={post}
+          onDelete={onDelete}
+        />
       ))}
 
     </div>

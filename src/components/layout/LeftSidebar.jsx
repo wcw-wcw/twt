@@ -1,4 +1,9 @@
+import { Link } from "react-router-dom"
+import { NavLink } from "react-router-dom"
+
 function LeftSidebar() {
+  const navClass = ({ isActive }) =>
+    isActive ? "navItem active" : "navItem"
 
   return (
     <aside className="sidebar">
@@ -7,9 +12,9 @@ function LeftSidebar() {
 
       <nav>
 
-        <div className="navItem">Home</div>
-
-        <div className="navItem">Profile </div>
+        <NavLink to="/" className={navClass}>Home</NavLink>
+      
+        <NavLink to="/profile" className={navClass}>Profile</NavLink>
 
         <div className="navItem">Explore</div>
 

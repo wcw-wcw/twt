@@ -16,6 +16,10 @@ function App() {
     localStorage.setItem("posts", JSON.stringify(posts))
   }, [posts])
 
+  const deletePost = (id) => {
+    setPosts(prev => prev.filter(p => p.id !== id))
+  }
+
   const addPost = (content) => {
 
     const newPost = {
@@ -39,7 +43,7 @@ function App() {
 
         <Route
           path="/"
-          element={<Home posts={posts} addPost={addPost} />}
+          element={<Home posts={posts} addPost={addPost} deletePost={deletePost}/>}
         />
 
         <Route
