@@ -1,0 +1,109 @@
+body{
+  margin:0;
+  font-family:Arial;
+  background:#15202b;
+  color:white;
+}
+
+/* Layout */
+
+.layout{
+  display:flex;
+  justify-content:center;
+}
+
+.sidebar{
+  width:250px;
+  padding:20px;
+  border-right:1px solid #38444d;
+}
+
+.rightPanel{
+  width:250px;
+  padding:20px;
+  border-left:1px solid #38444d;
+}
+
+.mainContent{
+  width:600px;
+  padding:20px;
+}
+
+/* Navigation */
+
+.navItem{
+  margin:15px 0;
+  cursor:pointer;
+}
+
+/* Composer */
+
+.composer textarea{
+  width:100%;
+  height:80px;
+  resize:none;
+  border:none;
+  border-radius:10px;
+  padding:10px;
+}
+
+.composerFooter{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+}
+
+button{
+  background:#1d9bf0;
+  border:none;
+  padding:8px 16px;
+  border-radius:20px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* Timeline */
+
+.timeline{
+  margin-top:20px;
+}
+
+.post{
+  background:#1e2732;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.postHeader{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:14px;
+}
+
+.empty{
+  text-align:center;
+  opacity:.6;
+}
+
+/* Top Bar */
+
+.topBar{
+  display:flex;
+  justify-content:flex-end;
+  padding:10px 30px;
+  border-bottom:1px solid #38444d;
+}
+
+.homeButton{
+  background:#1d9bf0;
+  border:none;
+  padding:8px 16px;
+  border-radius:20px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  text-align: left;
+}
