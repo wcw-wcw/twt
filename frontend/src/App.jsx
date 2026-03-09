@@ -9,52 +9,25 @@ function App() {
 
   const [posts, setPosts] = useState([])
 
-  // Load posts from backend
   useEffect(() => {
-    fetch("http://localhost:3001/api/posts")
-      .then(res => res.json())
-      .then(data => setPosts(data))
-      .catch(err => console.error(err))
+    fetchPosts()
   }, [])
 
-  const deletePost = async (id) => {
+  const fetchPosts = async () => {
 
-    try {
-      await fetch(`http://localhost:3001/api/posts/${id}`, {
-        method: "DELETE"
-      })
+    const res = await fetch("http://localhost:3001/api/posts")
 
-      setPosts(prev => prev.filter(p => p.id !== id))
+    const data = await res.json()
 
-    } catch (err) {
-      console.error(err)
-    }
-
+    setPosts(data)
   }
 
-  const addPost = async (content) => {
+  const deletePost = (id) => {
+    setPosts(prev => prev.filter(p => p.id !== id))
+  }
 
-    try {
-
-      const res = await fetch("http://localhost:3001/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          content,
-          author_id: "6b4e196d-5bfc-4816-92a1-d8711e3f438f"
-        })
-      })
-
-      const newPost = await res.json()
-
-      setPosts(prev => [newPost, ...prev])
-
-    } catch (err) {
-      console.error(err)
-    }
-
+  const addPost = (post) => {
+    setPosts(prev => [post, ...prev])
   }
 
   return (
@@ -64,13 +37,7 @@ function App() {
 
         <Route
           path="/"
-          element={
-            <Home
-              posts={posts}
-              addPost={addPost}
-              deletePost={deletePost}
-            />
-          }
+          element={<Home posts={posts} addPost={addPost} deletePost={deletePost} />}
         />
 
         <Route

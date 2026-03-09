@@ -34,8 +34,11 @@ exports.getPosts = async (req, res) => {
   }
 }
 
+
 exports.createPost = async (req, res) => {
-  const { content, author_id } = req.body
+
+  const { content } = req.body
+  const userId = req.user.id   // 🔐 comes from JWT middleware
 
   try {
 
@@ -43,13 +46,13 @@ exports.createPost = async (req, res) => {
       INSERT INTO posts (content, author_id)
       VALUES ($1, $2)
       RETURNING *
-    `, [content, author_id])
+    `, [content, userId])
 
     const post = result.rows[0]
 
     const user = await pool.query(
       `SELECT id, username FROM users WHERE id = $1`,
-      [author_id]
+      [userId]
     )
 
     res.json({
@@ -67,15 +70,29 @@ exports.createPost = async (req, res) => {
     console.error(err)
     res.status(500).json({ error: "Failed to create post" })
   }
+
 }
 
+
 exports.deletePost = async (req, res) => {
+
   const { id } = req.params
 
   try {
-    await pool.query("DELETE FROM posts WHERE id=$1", [id])
+
+    await pool.query(
+      "DELETE FROM posts WHERE id = $1",
+      [id]
+    )
+
     res.json({ success: true })
+
   } catch (err) {
+
+    console.error(err)
+
     res.status(500).json({ error: "Failed to delete" })
+
   }
+
 }

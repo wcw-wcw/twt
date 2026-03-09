@@ -4,12 +4,27 @@ function PostComposer({ onPost }) {
 
   const [text, setText] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!text.trim()) return
 
-    onPost(text)
+    const token = localStorage.getItem("token")
+
+    const res = await fetch("http://localhost:3001/api/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        content: text
+      })
+    })
+
+    const newPost = await res.json()
+
+    onPost(newPost)
 
     setText("")
   }

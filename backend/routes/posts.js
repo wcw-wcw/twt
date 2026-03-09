@@ -1,14 +1,13 @@
 const express = require("express")
 const router = express.Router()
 
-const {
-  getPosts,
-  createPost,
-  deletePost
-} = require("../controllers/postsController")
+const postsController = require("../controllers/postsController")
+const auth = require("../middleware/auth")
 
-router.get("/", getPosts)
-router.post("/", createPost)
-router.delete("/:id", deletePost)
+router.get("/", postsController.getPosts)
+
+router.post("/", auth, postsController.createPost)
+
+router.delete("/:id", postsController.deletePost)
 
 module.exports = router
