@@ -6,6 +6,7 @@ function RightPanel() {
       <h3>Trends</h3>
 
       <p>#react</p>
+      <p>#vite</p>
       <p>#javascript</p>
       <p>#express</p>
       <p>#postgreSQL</p>
