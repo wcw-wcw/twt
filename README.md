@@ -23,7 +23,7 @@ Following/unfollowing of other users
 ————————————————
 
 React
-React Router
+
 Fetch API
 
 ————————————————
@@ -31,6 +31,7 @@ Fetch API
 ————————————————
 
 Node.js
+
 Express
 
 ————————————————
@@ -44,4 +45,5 @@ PostgreSQL
 ————————————————
 
 JSON Web Tokens (jsonwebtoken)
+
 bcrypt password hashing
