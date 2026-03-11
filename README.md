@@ -1,5 +1,5 @@
 ————————————————
-Summary
+    Summary
 ————————————————
 
 Blogging application inspired by Twitter/X.
@@ -8,7 +8,7 @@ Users can follow each other and view profile pages that contain all of a user’
 The frontend is built with React and communicates with an Express REST API  to access a PostgreSQL database.
 
 ————————————————
-Features
+    Features
 ————————————————
 
 Secure login and registration using JWT and bcrypt hashing
@@ -19,7 +19,7 @@ Profile pages for each registered user with user statistics, following/followers
 Following/unfollowing of other users
 
 ————————————————
-Frontend
+    Frontend
 ————————————————
 
 React
@@ -27,20 +27,20 @@ React Router
 Fetch API
 
 ————————————————
-Backend
+    Backend
 ————————————————
 
 Node.js
 Express
 
 ————————————————
-Database
+    Database
 ————————————————
 
 PostgreSQL
 
 ————————————————
-Authentication
+ Authentication
 ————————————————
 
 JSON Web Tokens (jsonwebtoken)
