@@ -1,99 +1,165 @@
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Routes, Route } from "react-router-dom"
 
 import Layout from "./components/layout/Layout"
 import Home from "./pages/Home"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
 import Profile from "./pages/Profile"
+import { API_BASE_URL, getAuthHeaders } from "./lib/api"
 
 function App() {
-
   const [posts, setPosts] = useState([])
-  const [user, setUser] = useState(null)
+  const [postsLoading, setPostsLoading] = useState(true)
+  const [postsError, setPostsError] = useState("")
+
+  const [currentUser, setCurrentUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
 
   const fetchPosts = async () => {
+    setPostsLoading(true)
+    setPostsError("")
 
-    const res = await fetch("http://localhost:3001/api/posts")
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/posts`)
+      const data = await res.json()
 
-    const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to load posts")
+      }
 
-    setPosts(data)
-
+      setPosts(data)
+    } catch (error) {
+      setPostsError(error.message)
+    } finally {
+      setPostsLoading(false)
+    }
   }
 
   const fetchCurrentUser = async () => {
-
     const token = localStorage.getItem("token")
 
-    if (!token) return
+    if (!token) {
+      setAuthLoading(false)
+      return
+    }
 
-    const res = await fetch("http://localhost:3001/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: getAuthHeaders()
+      })
+
+      if (!res.ok) {
+        localStorage.removeItem("token")
+        setCurrentUser(null)
+        return
       }
-    })
 
-    if (!res.ok) return
-
-    const data = await res.json()
-
-    setUser(data)
-
+      const data = await res.json()
+      setCurrentUser(data)
+    } catch (error) {
+      setCurrentUser(null)
+    } finally {
+      setAuthLoading(false)
+    }
   }
 
   useEffect(() => {
-
     fetchPosts()
     fetchCurrentUser()
-
   }, [])
 
-  const addPost = (newPost) => {
-
-    setPosts(prev => [newPost, ...prev])
-
-  }
-
-  const deletePost = async (id) => {
-
-    const token = localStorage.getItem("token")
-
-    await fetch(`http://localhost:3001/api/posts/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  const login = async (email, password) => {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: getAuthHeaders(true),
+      body: JSON.stringify({ email, password })
     })
 
-    setPosts(prev => prev.filter(p => p.id !== id))
+    const data = await res.json()
 
+    if (!res.ok) {
+      throw new Error(data.error || "Login failed")
+    }
+
+    localStorage.setItem("token", data.token)
+    setCurrentUser(data.user)
+  }
+
+  const logout = () => {
+    localStorage.removeItem("token")
+    setCurrentUser(null)
+  }
+
+  const addPost = (newPost) => {
+    setPosts((prev) => [newPost, ...prev])
+  }
+
+  const deletePost = async (postId) => {
+    const previousPosts = posts
+
+    setPosts((prev) => prev.filter((post) => post.id !== postId))
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete post")
+      }
+    } catch (error) {
+      setPosts(previousPosts)
+      throw error
+    }
   }
 
   return (
-
-    <Layout user={user}>
-
+    <Layout
+      user={currentUser}
+      logout={logout}
+      authLoading={authLoading}
+    >
       <Routes>
-
         <Route
           path="/"
           element={
             <Home
               posts={posts}
+              postsLoading={postsLoading}
+              postsError={postsError}
+              currentUser={currentUser}
               addPost={addPost}
               deletePost={deletePost}
+              refreshPosts={fetchPosts}
             />
           }
         />
 
         <Route
-          path="/profile"
-          element={<Profile />}
+          path="/login"
+          element={<Login login={login} currentUser={currentUser} />}
         />
 
+        <Route
+          path="/register"
+          element={<Register setCurrentUser={setCurrentUser} />}
+        />
+
+        <Route
+          path="/profile/:id"
+          element={
+            <Profile
+              currentUser={currentUser}
+              onDeletePost={deletePost}
+            />
+          }
+        />
       </Routes>
-
     </Layout>
-
   )
 }
 

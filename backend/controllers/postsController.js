@@ -1,98 +1,112 @@
 const pool = require("../db")
 
+const mapPostRow = (row) => ({
+  id: row.id,
+  content: row.content,
+  createdAt: row.created_at,
+  author: {
+    id: row.author_id,
+    username: row.username,
+    avatar: row.avatar_url || "/default-avatar.png"
+  }
+})
+
 exports.getPosts = async (req, res) => {
   try {
-
     const result = await pool.query(`
       SELECT
         posts.id,
         posts.content,
         posts.created_at,
         users.id AS author_id,
-        users.username
+        users.username,
+        users.avatar_url
       FROM posts
       JOIN users ON posts.author_id = users.id
       ORDER BY posts.created_at DESC
     `)
 
-    const posts = result.rows.map(row => ({
-      id: row.id,
-      content: row.content,
-      createdAt: row.created_at,
-      author: {
-        id: row.author_id,
-        username: row.username,
-        avatar: "/default-avatar.png"
-      }
-    }))
-
-    res.json(posts)
-
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: "Server error" })
+    return res.json(result.rows.map(mapPostRow))
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Server error" })
   }
 }
 
-
 exports.createPost = async (req, res) => {
+  const content = req.body.content?.trim()
+  const userId = req.user.id
 
-  const { content } = req.body
-  const userId = req.user.id   // 🔐 comes from JWT middleware
+  if (!content) {
+    return res.status(400).json({ error: "Post content is required" })
+  }
+
+  if (content.length > 280) {
+    return res.status(400).json({ error: "Post content cannot exceed 280 characters" })
+  }
 
   try {
+    const result = await pool.query(
+      `
+        INSERT INTO posts (content, author_id)
+        VALUES ($1, $2)
+        RETURNING id, content, created_at, author_id
+      `,
+      [content, userId]
+    )
 
-    const result = await pool.query(`
-      INSERT INTO posts (content, author_id)
-      VALUES ($1, $2)
-      RETURNING *
-    `, [content, userId])
-
-    const post = result.rows[0]
-
-    const user = await pool.query(
-      `SELECT id, username FROM users WHERE id = $1`,
+    const userResult = await pool.query(
+      `SELECT id, username, avatar_url FROM users WHERE id = $1`,
       [userId]
     )
 
-    res.json({
+    const post = result.rows[0]
+    const author = userResult.rows[0]
+
+    return res.status(201).json({
       id: post.id,
       content: post.content,
       createdAt: post.created_at,
       author: {
-        id: user.rows[0].id,
-        username: user.rows[0].username,
-        avatar: "/default-avatar.png"
+        id: author.id,
+        username: author.username,
+        avatar: author.avatar_url || "/default-avatar.png"
       }
     })
-
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: "Failed to create post" })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Failed to create post" })
   }
-
 }
 
-
 exports.deletePost = async (req, res) => {
-
   const { id } = req.params
+  const userId = req.user.id
 
   try {
-
-    await pool.query(
-      "DELETE FROM posts WHERE id = $1",
+    const postResult = await pool.query(
+      `SELECT id, author_id FROM posts WHERE id = $1`,
       [id]
     )
 
-    res.json({ success: true })
+    const post = postResult.rows[0]
 
-  } catch (err) {
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
 
-    console.error(err)
+    if (post.author_id !== userId) {
+      return res.status(403).json({ error: "You can only delete your own posts" })
+    }
 
-    res.status(500).json({ error: "Failed to delete" })
+    await pool.query(
+      `DELETE FROM posts WHERE id = $1`,
+      [id]
+    )
 
+    return res.json({ success: true, deletedPostId: id })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Failed to delete post" })
   }
-
 }

@@ -1,68 +1,93 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
-function Register() {
-
+function Register({ setCurrentUser }) {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    setError("")
+  }, [username, email, password])
 
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    await fetch("http://localhost:3001/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username,
-        email,
-        password
+    try {
+      setSubmitting(true)
+      setError("")
+
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: getAuthHeaders(true),
+        body: JSON.stringify({
+          username,
+          email,
+          password
+        })
       })
-    })
 
-    navigate("/login")
+      const data = await res.json()
 
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed")
+      }
+
+      localStorage.setItem("token", data.token)
+      setCurrentUser(data.user)
+      navigate("/")
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
-
     <div>
+      <h2>Create account</h2>
 
-      <h2>Register</h2>
+      {error && <p className="formError">{error}</p>}
 
       <form onSubmit={handleSubmit}>
-
         <input
-          placeholder="username"
+          placeholder="Username"
           value={username}
-          onChange={e => setUsername(e.target.value)}
+          onChange={(e) => setUsername(e.target.value)}
+          required
         />
 
         <input
-          placeholder="email"
+          type="email"
+          placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
           type="password"
-          placeholder="password"
+          placeholder="Password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
+          minLength={6}
+          required
         />
 
-        <button type="submit">
-          Register
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Creating..." : "Register"}
         </button>
-
       </form>
 
+      <p>
+        Already have an account? <Link to="/login">Login</Link>
+      </p>
     </div>
-
   )
 }
 

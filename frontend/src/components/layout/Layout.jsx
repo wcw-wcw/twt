@@ -2,25 +2,16 @@ import LeftSidebar from "./LeftSidebar"
 import RightPanel from "./RightPanel"
 import TopBar from "./TopBar"
 
-function Layout({ children, user, logout }) {
-
+function Layout({ children, user, logout, authLoading }) {
   return (
     <div className="layoutWrapper">
-
-      <TopBar user={user} logout={logout} />
+      <TopBar user={user} logout={logout} authLoading={authLoading} />
 
       <div className="layout">
-
-        <LeftSidebar />
-
-        <main className="mainContent">
-          {children}
-        </main>
-
+        <LeftSidebar user={user} />
+        <main className="mainContent">{children}</main>
         <RightPanel />
-
       </div>
-
     </div>
   )
 }

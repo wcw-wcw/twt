@@ -1,62 +1,76 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
+import { API_BASE_URL, getAuthHeaders } from "../../lib/api"
 
-function PostComposer({ onPost }) {
-
+function PostComposer({ onPost, currentUser }) {
   const [text, setText] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!text.trim()) return
-
-    const token = localStorage.getItem("token")
-
-    if (!token) {
-      alert("Please log in to post")
+    if (!currentUser) {
+      setError("Please log in to create a post.")
       return
     }
 
-    const res = await fetch("http://localhost:3001/api/posts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        content: text
+    if (!text.trim()) {
+      setError("Post cannot be empty.")
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      setError("")
+
+      const res = await fetch(`${API_BASE_URL}/api/posts`, {
+        method: "POST",
+        headers: getAuthHeaders(true),
+        body: JSON.stringify({
+          content: text
+        })
       })
-    })
 
-    if (!res.ok) {
-      alert("Post failed. Try logging in again.")
-      return
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create post")
+      }
+
+      onPost(data)
+      setText("")
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setSubmitting(false)
     }
-
-    const newPost = await res.json()
-
-    onPost(newPost)
-
-    setText("")
   }
 
   return (
     <form className="composer" onSubmit={handleSubmit}>
-
       <textarea
-        placeholder="What's happening?"
+        placeholder={currentUser ? "What's happening?" : "Log in to post"}
         value={text}
         maxLength={280}
+        disabled={!currentUser || submitting}
         onChange={(e) => setText(e.target.value)}
       />
 
+      {error && <p className="formError">{error}</p>}
+
+      {!currentUser && (
+        <p className="empty">
+          <Link to="/login">Log in</Link> to join the conversation.
+        </p>
+      )}
+
       <div className="composerFooter">
-
         <span>{text.length}/280</span>
-
-        <button type="submit">Post</button>
-
+        <button type="submit" disabled={!currentUser || submitting}>
+          {submitting ? "Posting..." : "Post"}
+        </button>
       </div>
-
     </form>
   )
 }
