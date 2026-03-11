@@ -42,5 +42,6 @@ PostgreSQL
 ————————————————
 Authentication
 ————————————————
+
 JSON Web Tokens (jsonwebtoken)
 bcrypt password hashing
