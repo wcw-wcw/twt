@@ -8,10 +8,7 @@ import Profile from "./pages/Profile"
 function App() {
 
   const [posts, setPosts] = useState([])
-
-  useEffect(() => {
-    fetchPosts()
-  }, [])
+  const [user, setUser] = useState(null)
 
   const fetchPosts = async () => {
 
@@ -20,24 +17,72 @@ function App() {
     const data = await res.json()
 
     setPosts(data)
+
   }
 
-  const deletePost = (id) => {
+  const fetchCurrentUser = async () => {
+
+    const token = localStorage.getItem("token")
+
+    if (!token) return
+
+    const res = await fetch("http://localhost:3001/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!res.ok) return
+
+    const data = await res.json()
+
+    setUser(data)
+
+  }
+
+  useEffect(() => {
+
+    fetchPosts()
+    fetchCurrentUser()
+
+  }, [])
+
+  const addPost = (newPost) => {
+
+    setPosts(prev => [newPost, ...prev])
+
+  }
+
+  const deletePost = async (id) => {
+
+    const token = localStorage.getItem("token")
+
+    await fetch(`http://localhost:3001/api/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
     setPosts(prev => prev.filter(p => p.id !== id))
-  }
 
-  const addPost = (post) => {
-    setPosts(prev => [post, ...prev])
   }
 
   return (
-    <Layout>
+
+    <Layout user={user}>
 
       <Routes>
 
         <Route
           path="/"
-          element={<Home posts={posts} addPost={addPost} deletePost={deletePost} />}
+          element={
+            <Home
+              posts={posts}
+              addPost={addPost}
+              deletePost={deletePost}
+            />
+          }
         />
 
         <Route
@@ -48,6 +93,7 @@ function App() {
       </Routes>
 
     </Layout>
+
   )
 }
 

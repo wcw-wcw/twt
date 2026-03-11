@@ -26,6 +26,25 @@ exports.register = async (req, res) => {
   }
 }
 
+exports.getMe = async (req, res) => {
+
+  try {
+
+    const user = await pool.query(
+      "SELECT id, username, email FROM users WHERE id=$1",
+      [req.user.id]
+    )
+
+    res.json(user.rows[0])
+
+  } catch (err) {
+
+    res.status(500).json({ error: "Server error" })
+
+  }
+
+}
+
 exports.login = async (req, res) => {
   const { email, password } = req.body
 

@@ -9,8 +9,8 @@ function Post({ post, onDelete }) {
 
       <div className="postHeader">
 
-        <strong>@{post.author.username}</strong>
-
+        <strong>@{post.author?.username || "unknown"}</strong>
+        
         <span>{relative}</span>
 
       </div>
