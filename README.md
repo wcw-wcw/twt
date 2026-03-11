@@ -1,6 +1,7 @@
 ————————————————
 Summary
 ————————————————
+
 Blogging application inspired by Twitter/X.
 Users can register accounts and create short posts that other users can see on a public timeline.
 Users can follow each other and view profile pages that contain all of a user’s posts. 
@@ -9,6 +10,7 @@ The frontend is built with React and communicates with an Express REST API  to a
 ————————————————
 Features
 ————————————————
+
 Secure login and registration using JWT and bcrypt hashing
 Persistent login
 Post creation and deletion showing timestamps and post authors
@@ -19,6 +21,7 @@ Following/unfollowing of other users
 ————————————————
 Frontend
 ————————————————
+
 React
 React Router
 Fetch API
@@ -26,12 +29,14 @@ Fetch API
 ————————————————
 Backend
 ————————————————
+
 Node.js
 Express
 
 ————————————————
 Database
 ————————————————
+
 PostgreSQL
 
 ————————————————
