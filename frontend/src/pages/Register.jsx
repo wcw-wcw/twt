@@ -1,35 +1,26 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
-function Register({ setCurrentUser }) {
+function Register({ setUser }) {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const [submitting, setSubmitting] = useState(false)
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    setError("")
-  }, [username, email, password])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     try {
-      setSubmitting(true)
       setError("")
 
-      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const res = await fetch("http://localhost:3001/api/auth/register", {
         method: "POST",
-        headers: getAuthHeaders(true),
-        body: JSON.stringify({
-          username,
-          email,
-          password
-        })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, email, password })
       })
 
       const data = await res.json()
@@ -39,12 +30,10 @@ function Register({ setCurrentUser }) {
       }
 
       localStorage.setItem("token", data.token)
-      setCurrentUser(data.user)
+      setUser(data.user)
       navigate("/")
-    } catch (error) {
-      setError(error.message)
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -75,13 +64,10 @@ function Register({ setCurrentUser }) {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
           required
         />
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Creating..." : "Register"}
-        </button>
+        <button type="submit">Register</button>
       </form>
 
       <p>

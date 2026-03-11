@@ -1,28 +1,45 @@
 import { Link } from "react-router-dom"
+import Avatar from "../common/Avatar"
 
-function TopBar({ user, logout, authLoading }) {
+function TopBar({ user, logout }) {
   return (
-    <div className="topBar">
-      <Link to="/">
-        <h2>Twitter Clone</h2>
-      </Link>
+    <header className="topBar">
+      <div className="topBarInner">
+        <Link to="/" className="brandLink">
+          <h1 className="brandTitle">Twitter Clone</h1>
+        </Link>
 
-      <div className="topBarAuth">
-        {authLoading ? (
-          <span>Loading...</span>
-        ) : user ? (
-          <>
-            <Link to={`/profile/${user.id}`}>@{user.username}</Link>
-            <button onClick={logout}>Logout</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Sign Up</Link>
-          </>
-        )}
+        <div className="topBarAuth">
+          {user ? (
+            <>
+              <Link to={`/profile/${user.id}`} className="topBarProfile">
+                <Avatar
+                  src={user.avatar}
+                  name={user.username}
+                  alt={`${user.username} avatar`}
+                  size={36}
+                />
+                <span className="topBarUsername">@{user.username}</span>
+              </Link>
+
+              <button className="topBarButton primaryButton" onClick={logout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="topBarButton ghostButton">
+                Login
+              </Link>
+
+              <Link to="/register" className="topBarButton primaryButton">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </header>
   )
 }
 

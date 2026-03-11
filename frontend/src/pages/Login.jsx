@@ -1,32 +1,37 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 
-function Login({ login, currentUser }) {
+function Login({ login }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const [submitting, setSubmitting] = useState(false)
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/")
-    }
-  }, [currentUser, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     try {
-      setSubmitting(true)
       setError("")
-      await login(email, password)
+
+      const res = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed")
+      }
+
+      login(data.user, data.token)
       navigate("/")
-    } catch (error) {
-      setError(error.message)
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -53,9 +58,7 @@ function Login({ login, currentUser }) {
           required
         />
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Logging in..." : "Login"}
-        </button>
+        <button type="submit">Login</button>
       </form>
 
       <p>

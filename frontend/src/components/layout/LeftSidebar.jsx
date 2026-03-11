@@ -6,9 +6,9 @@ function LeftSidebar({ user }) {
 
   return (
     <aside className="sidebar">
-      <h2>MiniTwitter</h2>
+      <h2 className="sidebarTitle">MiniTwitter</h2>
 
-      <nav>
+      <nav className="sidebarNav">
         <NavLink to="/" className={navClass}>
           Home
         </NavLink>
@@ -19,8 +19,8 @@ function LeftSidebar({ user }) {
           </NavLink>
         )}
 
-        <div className="navItem">Explore</div>
-        <div className="navItem">Settings</div>
+        <div className="navItem navItemStatic">Explore</div>
+        <div className="navItem navItemStatic">Settings</div>
       </nav>
     </aside>
   )

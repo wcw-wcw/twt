@@ -1,16 +1,14 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { API_BASE_URL, getAuthHeaders } from "../../lib/api"
 
-function PostComposer({ onPost, currentUser }) {
+function PostComposer({ onPost, user }) {
   const [text, setText] = useState("")
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!currentUser) {
+    if (!user) {
       setError("Please log in to create a post.")
       return
     }
@@ -21,15 +19,17 @@ function PostComposer({ onPost, currentUser }) {
     }
 
     try {
-      setSubmitting(true)
       setError("")
 
-      const res = await fetch(`${API_BASE_URL}/api/posts`, {
+      const token = localStorage.getItem("token")
+
+      const res = await fetch("http://localhost:3001/api/posts", {
         method: "POST",
-        headers: getAuthHeaders(true),
-        body: JSON.stringify({
-          content: text
-        })
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ content: text })
       })
 
       const data = await res.json()
@@ -40,36 +40,31 @@ function PostComposer({ onPost, currentUser }) {
 
       onPost(data)
       setText("")
-    } catch (error) {
-      setError(error.message)
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err.message)
     }
   }
 
   return (
     <form className="composer" onSubmit={handleSubmit}>
       <textarea
-        placeholder={currentUser ? "What's happening?" : "Log in to post"}
+        placeholder={user ? "What's happening?" : "Log in to post"}
         value={text}
         maxLength={280}
-        disabled={!currentUser || submitting}
         onChange={(e) => setText(e.target.value)}
       />
 
-      {error && <p className="formError">{error}</p>}
-
-      {!currentUser && (
+      {!user && (
         <p className="empty">
           <Link to="/login">Log in</Link> to join the conversation.
         </p>
       )}
 
+      {error && <p className="formError">{error}</p>}
+
       <div className="composerFooter">
         <span>{text.length}/280</span>
-        <button type="submit" disabled={!currentUser || submitting}>
-          {submitting ? "Posting..." : "Post"}
-        </button>
+        <button type="submit">Post</button>
       </div>
     </form>
   )

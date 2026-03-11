@@ -1,27 +1,15 @@
 import PostComposer from "../components/posts/PostComposer"
 import Timeline from "../components/posts/Timeline"
 
-function Home({
-  posts,
-  postsLoading,
-  postsError,
-  currentUser,
-  addPost,
-  deletePost
-}) {
+function Home({ posts, addPost, deletePost, user }) {
   return (
     <div>
-      <PostComposer
-        onPost={addPost}
-        currentUser={currentUser}
-      />
+      <PostComposer onPost={addPost} user={user} />
 
       <Timeline
         posts={posts}
-        currentUser={currentUser}
         onDelete={deletePost}
-        loading={postsLoading}
-        error={postsError}
+        user={user}
       />
     </div>
   )
