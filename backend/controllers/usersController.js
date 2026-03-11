@@ -9,6 +9,8 @@ exports.getUserProfile = async (req, res) => {
         SELECT
           u.id,
           u.username,
+          u.email,
+          u.avatar_url,
           u.created_at,
           (
             SELECT COUNT(*)
@@ -40,6 +42,8 @@ exports.getUserProfile = async (req, res) => {
     return res.json({
       id: user.id,
       username: user.username,
+      email: user.email,
+      avatarUrl: user.avatar_url,
       createdAt: user.created_at,
       counts: {
         posts: Number(user.post_count),
@@ -81,7 +85,7 @@ exports.getUserPosts = async (req, res) => {
       author: {
         id: row.author_id,
         username: row.username,
-        avatar: row.avatar_url || "/default-avatar.png"
+        avatarUrl: row.avatar_url
       }
     }))
 
@@ -149,7 +153,7 @@ exports.getFollowers = async (req, res) => {
   try {
     const result = await pool.query(
       `
-        SELECT u.id, u.username, u.created_at
+        SELECT u.id, u.username, u.avatar_url, u.created_at
         FROM follows f
         JOIN users u ON u.id = f.follower_id
         WHERE f.following_id = $1
@@ -161,6 +165,7 @@ exports.getFollowers = async (req, res) => {
     return res.json(result.rows.map((row) => ({
       id: row.id,
       username: row.username,
+      avatarUrl: row.avatar_url,
       createdAt: row.created_at
     })))
   } catch (error) {
@@ -175,7 +180,7 @@ exports.getFollowing = async (req, res) => {
   try {
     const result = await pool.query(
       `
-        SELECT u.id, u.username, u.created_at
+        SELECT u.id, u.username, u.avatar_url, u.created_at
         FROM follows f
         JOIN users u ON u.id = f.following_id
         WHERE f.follower_id = $1
@@ -187,6 +192,7 @@ exports.getFollowing = async (req, res) => {
     return res.json(result.rows.map((row) => ({
       id: row.id,
       username: row.username,
+      avatarUrl: row.avatar_url,
       createdAt: row.created_at
     })))
   } catch (error) {

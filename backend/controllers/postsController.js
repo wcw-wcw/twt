@@ -7,7 +7,7 @@ const mapPostRow = (row) => ({
   author: {
     id: row.author_id,
     username: row.username,
-    avatar: row.avatar_url || "/default-avatar.png"
+    avatarUrl: row.avatar_url
   }
 })
 
@@ -70,7 +70,7 @@ exports.createPost = async (req, res) => {
       author: {
         id: author.id,
         username: author.username,
-        avatar: author.avatar_url || "/default-avatar.png"
+        avatarUrl: author.avatar_url
       }
     })
   } catch (error) {
@@ -99,10 +99,7 @@ exports.deletePost = async (req, res) => {
       return res.status(403).json({ error: "You can only delete your own posts" })
     }
 
-    await pool.query(
-      `DELETE FROM posts WHERE id = $1`,
-      [id]
-    )
+    await pool.query(`DELETE FROM posts WHERE id = $1`, [id])
 
     return res.json({ success: true, deletedPostId: id })
   } catch (error) {

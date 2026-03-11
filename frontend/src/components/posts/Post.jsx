@@ -11,7 +11,7 @@ function Post({ post, onDelete, user }) {
     <article className="post">
       <div className="postAvatarWrap">
         <Avatar
-          src={post.author?.avatar}
+          src={post.author?.avatarUrl}
           name={post.author?.username}
           alt={`${post.author?.username || "Unknown"} avatar`}
           size={48}
@@ -36,10 +36,7 @@ function Post({ post, onDelete, user }) {
           <span className="postDate">{date.toLocaleString()}</span>
 
           {canDelete && (
-            <button
-              className="deleteButton"
-              onClick={() => onDelete(post.id)}
-            >
+            <button className="deleteButton" onClick={() => onDelete(post.id)}>
               Delete
             </button>
           )}

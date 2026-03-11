@@ -14,7 +14,7 @@ function TopBar({ user, logout }) {
             <>
               <Link to={`/profile/${user.id}`} className="topBarProfile">
                 <Avatar
-                  src={user.avatar}
+                  src={user.avatarUrl}
                   name={user.username}
                   alt={`${user.username} avatar`}
                   size={36}

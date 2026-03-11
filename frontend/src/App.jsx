@@ -6,13 +6,14 @@ import Home from "./pages/Home"
 import Profile from "./pages/Profile"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import { API_BASE_URL, getAuthHeaders } from "./lib/api"
 
 function App() {
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState(null)
 
   const fetchPosts = async () => {
-    const res = await fetch("http://localhost:3001/api/posts")
+    const res = await fetch(`${API_BASE_URL}/api/posts`)
     const data = await res.json()
     setPosts(data)
   }
@@ -22,10 +23,8 @@ function App() {
     if (!token) return
 
     try {
-      const res = await fetch("http://localhost:3001/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: getAuthHeaders()
       })
 
       if (!res.ok) {
@@ -52,13 +51,9 @@ function App() {
   }
 
   const deletePost = async (id) => {
-    const token = localStorage.getItem("token")
-
-    const res = await fetch(`http://localhost:3001/api/posts/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: getAuthHeaders()
     })
 
     if (!res.ok) {
@@ -94,17 +89,18 @@ function App() {
           }
         />
 
-        <Route path="/profile/:id" element={<Profile user={user} />} />
-
         <Route
-          path="/login"
-          element={<Login login={login} />}
+          path="/profile/:id"
+          element={
+            <Profile
+              user={user}
+              onDeletePost={deletePost}
+            />
+          }
         />
 
-        <Route
-          path="/register"
-          element={<Register setUser={setUser} />}
-        />
+        <Route path="/login" element={<Login login={login} />} />
+        <Route path="/register" element={<Register setUser={setUser} />} />
       </Routes>
     </Layout>
   )

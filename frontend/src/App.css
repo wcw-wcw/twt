@@ -385,3 +385,40 @@ button:hover {
     display: none;
   }
 }
+
+.profileUserList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profileUserRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-radius: 14px;
+  color: #e7edf3;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.profileUserRow:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profileUserMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profileUserHandle {
+  font-weight: 700;
+  color: #f5f9ff;
+}
+
+.profileUserRow:hover .profileUserHandle {
+  color: #1d9bf0;
+}

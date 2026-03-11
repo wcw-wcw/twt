@@ -37,7 +37,7 @@ exports.register = async (req, res) => {
       `
         INSERT INTO users (username, email, password_hash)
         VALUES ($1, $2, $3)
-        RETURNING id, username, email, created_at
+        RETURNING id, username, email, avatar_url, created_at
       `,
       [username.trim(), email.trim().toLowerCase(), passwordHash]
     )
@@ -51,6 +51,7 @@ exports.register = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        avatarUrl: user.avatar_url,
         createdAt: user.created_at
       }
     })
@@ -69,7 +70,11 @@ exports.login = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT id, username, email, password_hash, created_at FROM users WHERE email = $1`,
+      `
+        SELECT id, username, email, password_hash, avatar_url, created_at
+        FROM users
+        WHERE email = $1
+      `,
       [email.trim().toLowerCase()]
     )
 
@@ -93,6 +98,7 @@ exports.login = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        avatarUrl: user.avatar_url,
         createdAt: user.created_at
       }
     })
@@ -105,7 +111,11 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, username, email, created_at FROM users WHERE id = $1`,
+      `
+        SELECT id, username, email, avatar_url, created_at
+        FROM users
+        WHERE id = $1
+      `,
       [req.user.id]
     )
 
@@ -119,6 +129,7 @@ exports.getMe = async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      avatarUrl: user.avatar_url,
       createdAt: user.created_at
     })
   } catch (error) {

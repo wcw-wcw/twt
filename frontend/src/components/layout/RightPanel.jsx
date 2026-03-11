@@ -7,6 +7,10 @@ function RightPanel() {
 
       <p>#react</p>
       <p>#javascript</p>
+      <p>#express</p>
+      <p>#postgreSQL</p>
+      <p>#node.js</p>
+      <p>#jwt</p>
       <p>#webdev</p>
 
     </aside>
