@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import Timeline from "../components/posts/Timeline"
 import Avatar from "../components/common/Avatar"
@@ -23,7 +23,7 @@ function Profile({ user, onDeletePost }) {
     return followers.some((follower) => follower.id === user.id)
   }, [followers, user])
 
-  const loadProfileData = async () => {
+  const loadProfileData = useCallback(async () => {
     try {
       setLoading(true)
       setError("")
@@ -56,11 +56,11 @@ function Profile({ user, onDeletePost }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
-    loadProfileData()
-  }, [id])
+    void loadProfileData()
+  }, [loadProfileData])
 
   const handleToggleFollow = async () => {
     if (!user) {

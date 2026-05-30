@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Routes, Route } from "react-router-dom"
 
 import Layout from "./components/layout/Layout"
@@ -12,13 +12,13 @@ function App() {
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState(null)
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     const res = await fetch(`${API_BASE_URL}/api/posts`)
     const data = await res.json()
     setPosts(data)
-  }
+  }, [])
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     const token = localStorage.getItem("token")
     if (!token) return
 
@@ -39,12 +39,13 @@ function App() {
       console.error("Failed to fetch current user:", error)
       setUser(null)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchPosts()
-    fetchCurrentUser()
-  }, [])
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchPosts()
+    void fetchCurrentUser()
+  }, [fetchPosts, fetchCurrentUser])
 
   const addPost = (newPost) => {
     setPosts((prev) => [newPost, ...prev])
