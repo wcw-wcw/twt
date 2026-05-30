@@ -14,13 +14,17 @@ app.use(cors({
 
 app.use(express.json())
 
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health"], (req, res) => {
   res.json({ ok: true })
 })
 
 app.use("/api/auth", authRoutes)
 app.use("/api/posts", postsRoutes)
 app.use("/api/users", usersRoutes)
+
+app.use("/auth", authRoutes)
+app.use("/posts", postsRoutes)
+app.use("/users", usersRoutes)
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" })
