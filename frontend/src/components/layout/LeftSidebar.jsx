@@ -6,8 +6,6 @@ function LeftSidebar({ user }) {
 
   return (
     <aside className="sidebar">
-      <h2 className="sidebarTitle">MiniTwitter</h2>
-
       <nav className="sidebarNav">
         <NavLink to="/" className={navClass}>
           Home

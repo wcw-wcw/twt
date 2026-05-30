@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { API_BASE_URL, getAuthHeaders } from "../../lib/api"
 
 function PostComposer({ onPost, user }) {
   const [text, setText] = useState("")
@@ -21,14 +22,9 @@ function PostComposer({ onPost, user }) {
     try {
       setError("")
 
-      const token = localStorage.getItem("token")
-
-      const res = await fetch("http://localhost:3001/api/posts", {
+      const res = await fetch(`${API_BASE_URL}/api/posts`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ content: text })
       })
 

@@ -6,7 +6,7 @@ function TopBar({ user, logout }) {
     <header className="topBar">
       <div className="topBarInner">
         <Link to="/" className="brandLink">
-          <h1 className="brandTitle">Twitter Clone</h1>
+          <h1 className="brandTitle">twt</h1>
         </Link>
 
         <div className="topBarAuth">

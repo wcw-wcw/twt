@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import { API_BASE_URL } from "../lib/api"
 
 function Register({ setUser }) {
   const [username, setUsername] = useState("")
@@ -15,7 +16,7 @@ function Register({ setUser }) {
     try {
       setError("")
 
-      const res = await fetch("http://localhost:3001/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -38,12 +39,12 @@ function Register({ setUser }) {
   }
 
   return (
-    <div>
+    <div className="authPanel">
       <h2>Create account</h2>
 
       {error && <p className="formError">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form className="authForm" onSubmit={handleSubmit}>
         <input
           placeholder="Username"
           value={username}
@@ -70,7 +71,7 @@ function Register({ setUser }) {
         <button type="submit">Register</button>
       </form>
 
-      <p>
+      <p className="authSwitch">
         Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>

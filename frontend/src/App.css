@@ -22,7 +22,7 @@ body {
 .sidebar,
 .rightPanel {
   width: 280px;
-  padding: 28px 20px;
+  padding: 36px 20px;
   min-height: calc(100vh - 78px);
 }
 
@@ -36,7 +36,7 @@ body {
 
 .mainContent {
   width: 680px;
-  padding: 22px;
+  padding: 32px 22px;
 }
 
 /* Brand + top bar */
@@ -64,15 +64,23 @@ body {
 .brandLink {
   display: inline-flex;
   align-items: center;
+  color: #f5f9ff;
+  text-decoration: none;
+}
+
+.brandLink:hover,
+.brandLink:focus-visible {
+  color: #f5f9ff;
+  text-decoration: none;
 }
 
 .brandTitle {
   margin: 0;
   color: #f5f9ff;
-  font-size: 2rem;
+  font-size: 2.25rem;
   line-height: 1;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .topBarAuth {
@@ -110,6 +118,7 @@ body {
   padding: 10px 18px;
   border-radius: 999px;
   font-weight: 700;
+  text-decoration: none;
   transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
 }
 
@@ -139,17 +148,10 @@ body {
 
 /* Sidebar */
 
-.sidebarTitle {
-  margin: 12px 0 24px;
-  font-size: 2.1rem;
-  font-weight: 800;
-  color: #f5f9ff;
-}
-
 .sidebarNav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .navItem {
@@ -160,7 +162,7 @@ body {
   border-radius: 999px;
   color: #e7edf3;
   text-decoration: none;
-  font-size: 1.9rem;
+  font-size: 1.65rem;
   font-weight: 700;
   transition: background 0.2s ease, color 0.2s ease;
 }
@@ -219,18 +221,19 @@ body {
 .composer {
   background: #192734;
   border: 1px solid #253341;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 18px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 
 .composer textarea {
   width: 100%;
+  display: block;
   min-height: 120px;
   resize: none;
   border: none;
   outline: none;
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 16px;
   background: #eff3f4;
   color: #111827;
@@ -259,6 +262,65 @@ button {
 button:hover {
   background: #178ad6;
   transform: translateY(-1px);
+}
+
+/* Auth forms */
+
+.authPanel {
+  max-width: 520px;
+}
+
+.authPanel h2 {
+  margin: 0 0 22px;
+  color: #f5f9ff;
+  font-size: 1.9rem;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.authForm input {
+  width: 100%;
+  border: 1px solid #2c3c4c;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #eff3f4;
+  color: #111827;
+  outline: none;
+}
+
+.authForm input:focus {
+  border-color: #1d9bf0;
+  box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.18);
+}
+
+.authForm button {
+  align-self: flex-start;
+}
+
+.authSwitch {
+  margin-top: 18px;
+  color: #cbd8e3;
+}
+
+.authSwitch a,
+.empty a {
+  color: #1d9bf0;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.authSwitch a:hover,
+.empty a:hover {
+  text-decoration: underline;
+}
+
+.formError {
+  color: #ff7a9a;
+  font-weight: 700;
 }
 
 /* Timeline */
