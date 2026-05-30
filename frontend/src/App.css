@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -219,6 +223,8 @@ body {
 /* Composer */
 
 .composer {
+  display: grid;
+  gap: 14px;
   background: #192734;
   border: 1px solid #253341;
   border-radius: 18px;
@@ -228,8 +234,11 @@ body {
 
 .composer textarea {
   width: 100%;
+  max-width: 100%;
   display: block;
+  box-sizing: border-box;
   min-height: 120px;
+  margin: 0;
   resize: none;
   border: none;
   outline: none;
@@ -244,7 +253,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 14px;
   color: #9fb0c0;
 }
 
