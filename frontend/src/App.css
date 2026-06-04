@@ -395,11 +395,21 @@ button:hover {
   word-break: break-word;
 }
 
+.postContentLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.postContentLink:hover .postContent {
+  color: #f5f9ff;
+}
+
 .postFooter {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .postDate {
@@ -407,7 +417,33 @@ button:hover {
   font-size: 0.9rem;
 }
 
+.threadLink,
+.backLink {
+  color: #1d9bf0;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.threadLink:hover,
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.backLink {
+  display: inline-flex;
+  margin-bottom: 16px;
+}
+
+.replyComposerSection {
+  margin: 10px 0 24px;
+}
+
+.threadHeading {
+  margin: 24px 0 0;
+}
+
 .deleteButton {
+  margin-left: auto;
   background: #e0245e;
 }
 

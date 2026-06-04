@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom"
 import Layout from "./components/layout/Layout"
 import Home from "./pages/Home"
 import Profile from "./pages/Profile"
+import PostThread from "./pages/PostThread"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import { API_BASE_URL, getAuthHeaders } from "./lib/api"
@@ -51,6 +52,14 @@ function App() {
     setPosts((prev) => [newPost, ...prev])
   }
 
+  const incrementReplyCount = (postId) => {
+    setPosts((prev) => prev.map((post) => (
+      post.id === postId
+        ? { ...post, replyCount: (post.replyCount || 0) + 1 }
+        : post
+    )))
+  }
+
   const deletePost = async (id) => {
     const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
       method: "DELETE",
@@ -86,6 +95,17 @@ function App() {
               addPost={addPost}
               deletePost={deletePost}
               user={user}
+            />
+          }
+        />
+
+        <Route
+          path="/post/:id"
+          element={
+            <PostThread
+              user={user}
+              onDeletePost={deletePost}
+              onReplyCreated={incrementReplyCount}
             />
           }
         />

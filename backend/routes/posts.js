@@ -6,6 +6,8 @@ const auth = require("../middleware/auth")
 
 router.get("/", postsController.getPosts)
 router.post("/", auth, postsController.createPost)
+router.get("/:id/thread", postsController.getThread)
+router.post("/:id/replies", auth, postsController.createReply)
 router.delete("/:id", auth, postsController.deletePost)
 
 module.exports = router

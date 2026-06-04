@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   content VARCHAR(280) NOT NULL,
   author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parent_post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -26,6 +27,13 @@ CREATE TABLE IF NOT EXISTS follows (
 
 CREATE INDEX IF NOT EXISTS idx_posts_author_id_created_at
   ON posts (author_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_posts_parent_post_id_created_at
+  ON posts (parent_post_id, created_at ASC);
+
+CREATE INDEX IF NOT EXISTS idx_posts_top_level_created_at
+  ON posts (created_at DESC)
+  WHERE parent_post_id IS NULL;
 
 CREATE INDEX IF NOT EXISTS idx_follows_follower_id
   ON follows (follower_id);

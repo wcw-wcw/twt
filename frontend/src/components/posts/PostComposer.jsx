@@ -2,7 +2,16 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { API_BASE_URL, getAuthHeaders } from "../../lib/api"
 
-function PostComposer({ onPost, user }) {
+function PostComposer({
+  onPost,
+  user,
+  endpoint = "/api/posts",
+  submitLabel = "Post",
+  placeholder = "What's happening?",
+  loggedOutPlaceholder = "Log in to post",
+  emptyMessage = "Post cannot be empty.",
+  loginPrompt = "to join the conversation."
+}) {
   const [text, setText] = useState("")
   const [error, setError] = useState("")
 
@@ -10,19 +19,19 @@ function PostComposer({ onPost, user }) {
     e.preventDefault()
 
     if (!user) {
-      setError("Please log in to create a post.")
+      setError("Please log in first.")
       return
     }
 
     if (!text.trim()) {
-      setError("Post cannot be empty.")
+      setError(emptyMessage)
       return
     }
 
     try {
       setError("")
 
-      const res = await fetch(`${API_BASE_URL}/api/posts`, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: getAuthHeaders(true),
         body: JSON.stringify({ content: text })
@@ -31,10 +40,10 @@ function PostComposer({ onPost, user }) {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to create post")
+        throw new Error(data.error || `Failed to create ${submitLabel.toLowerCase()}`)
       }
 
-      onPost(data)
+      onPost?.(data)
       setText("")
     } catch (err) {
       setError(err.message)
@@ -44,7 +53,7 @@ function PostComposer({ onPost, user }) {
   return (
     <form className="composer" onSubmit={handleSubmit}>
       <textarea
-        placeholder={user ? "What's happening?" : "Log in to post"}
+        placeholder={user ? placeholder : loggedOutPlaceholder}
         value={text}
         maxLength={280}
         onChange={(e) => setText(e.target.value)}
@@ -52,7 +61,7 @@ function PostComposer({ onPost, user }) {
 
       {!user && (
         <p className="empty">
-          <Link to="/login">Log in</Link> to join the conversation.
+          <Link to="/login">Log in</Link> {loginPrompt}
         </p>
       )}
 
@@ -60,7 +69,7 @@ function PostComposer({ onPost, user }) {
 
       <div className="composerFooter">
         <span>{text.length}/280</span>
-        <button type="submit">Post</button>
+        <button type="submit">{submitLabel}</button>
       </div>
     </form>
   )

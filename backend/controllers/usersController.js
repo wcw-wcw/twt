@@ -16,6 +16,7 @@ exports.getUserProfile = async (req, res) => {
             SELECT COUNT(*)
             FROM posts p
             WHERE p.author_id = u.id
+              AND p.parent_post_id IS NULL
           ) AS post_count,
           (
             SELECT COUNT(*)
@@ -66,13 +67,18 @@ exports.getUserPosts = async (req, res) => {
         SELECT
           p.id,
           p.content,
+          p.parent_post_id,
           p.created_at,
+          COUNT(replies.id) AS reply_count,
           u.id AS author_id,
           u.username,
           u.avatar_url
         FROM posts p
         JOIN users u ON u.id = p.author_id
+        LEFT JOIN posts replies ON replies.parent_post_id = p.id
         WHERE p.author_id = $1
+          AND p.parent_post_id IS NULL
+        GROUP BY p.id, u.id
         ORDER BY p.created_at DESC
       `,
       [id]
@@ -82,6 +88,8 @@ exports.getUserPosts = async (req, res) => {
       id: row.id,
       content: row.content,
       createdAt: row.created_at,
+      parentPostId: row.parent_post_id,
+      replyCount: Number(row.reply_count || 0),
       author: {
         id: row.author_id,
         username: row.username,

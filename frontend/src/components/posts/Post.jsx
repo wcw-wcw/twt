@@ -30,10 +30,16 @@ function Post({ post, onDelete, user }) {
           </div>
         </div>
 
-        <p className="postContent">{post.content}</p>
+        <Link to={`/post/${post.id}`} className="postContentLink">
+          <p className="postContent">{post.content}</p>
+        </Link>
 
         <div className="postFooter">
           <span className="postDate">{date.toLocaleString()}</span>
+
+          <Link to={`/post/${post.id}`} className="threadLink">
+            {post.replyCount || 0} {(post.replyCount || 0) === 1 ? "reply" : "replies"}
+          </Link>
 
           {canDelete && (
             <button className="deleteButton" onClick={() => onDelete(post.id)}>
