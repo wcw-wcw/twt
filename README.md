@@ -12,6 +12,7 @@ This app deploys to Vercel as a Vite static frontend plus an Express API mounted
 - Public home timeline for top-level posts
 - Direct replies on dedicated post thread pages
 - Reply counts on post cards
+- Quote posts with a compact preview of the referenced post
 - Profile pages with user statistics, following/followers, and top-level posts
 - Following/unfollowing of other users
 
@@ -20,6 +21,12 @@ This app deploys to Vercel as a Vite static frontend plus an Express API mounted
 Replies are stored as normal posts with a nullable `parent_post_id`. The home timeline and profile post lists show top-level posts only. A post thread page at `/post/:id` shows the selected post and its direct replies ordered oldest-first.
 
 The current implementation supports direct replies first. Deeper nested thread rendering is left as a future enhancement.
+
+## Quote Posts
+
+Quote posts are stored as normal top-level posts with a nullable `quote_post_id` reference to the original post. A quote post has its own author and content, and timelines render a compact preview that links back to the quoted post thread.
+
+Simple no-text reposts/retweets are intentionally not included yet and can be added as a separate feature later.
 
 ## Local development
 
@@ -57,14 +64,15 @@ For an existing local or Neon database, run the replies migration after deployin
 
 ```sh
 psql "$DATABASE_URL" -f database/migrations/001_post_replies.sql
+psql "$DATABASE_URL" -f database/migrations/002_quote_posts.sql
 ```
 
-The migration uses `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so it is safe to run against databases that may already have the replies column.
+The migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have the replies or quote-post columns.
 
 ## Vercel deployment
 
 1. Create a hosted Postgres database. Neon is the simplest fit with Vercel because it has a Vercel Marketplace integration and a free tier.
-2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql` against an existing hosted database.
+2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql` and `database/migrations/002_quote_posts.sql` against an existing hosted database.
 3. Import this repository into Vercel.
 4. Add these Vercel environment variables:
 

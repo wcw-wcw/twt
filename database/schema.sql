@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS posts (
   content VARCHAR(280) NOT NULL,
   author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   parent_post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  quote_post_id UUID REFERENCES posts(id) ON DELETE SET NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -30,6 +31,9 @@ CREATE INDEX IF NOT EXISTS idx_posts_author_id_created_at
 
 CREATE INDEX IF NOT EXISTS idx_posts_parent_post_id_created_at
   ON posts (parent_post_id, created_at ASC);
+
+CREATE INDEX IF NOT EXISTS idx_posts_quote_post_id
+  ON posts (quote_post_id);
 
 CREATE INDEX IF NOT EXISTS idx_posts_top_level_created_at
   ON posts (created_at DESC)

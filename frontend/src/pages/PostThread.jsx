@@ -6,7 +6,7 @@ import PostComposer from "../components/posts/PostComposer"
 import Timeline from "../components/posts/Timeline"
 import { API_BASE_URL } from "../lib/api"
 
-function PostThread({ user, onDeletePost, onReplyCreated }) {
+function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
   const { id } = useParams()
 
   const [post, setPost] = useState(null)
@@ -76,7 +76,12 @@ function PostThread({ user, onDeletePost, onReplyCreated }) {
     <div className="threadPage">
       <Link to="/" className="backLink">Back to home</Link>
 
-      <Post post={post} onDelete={handleDelete} user={user} />
+      <Post
+        post={post}
+        onDelete={handleDelete}
+        onQuoteCreated={onQuoteCreated}
+        user={user}
+      />
 
       <section className="replyComposerSection">
         {user ? (
@@ -104,6 +109,7 @@ function PostThread({ user, onDeletePost, onReplyCreated }) {
         <Timeline
           posts={replies}
           onDelete={handleDelete}
+          onQuoteCreated={onQuoteCreated}
           user={user}
         />
       )}

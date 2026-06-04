@@ -106,6 +106,7 @@ function App() {
               user={user}
               onDeletePost={deletePost}
               onReplyCreated={incrementReplyCount}
+              onQuoteCreated={addPost}
             />
           }
         />
@@ -116,6 +117,7 @@ function App() {
             <Profile
               user={user}
               onDeletePost={deletePost}
+              onQuoteCreated={addPost}
             />
           }
         />

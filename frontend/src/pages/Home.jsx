@@ -9,6 +9,7 @@ function Home({ posts, addPost, deletePost, user }) {
       <Timeline
         posts={posts}
         onDelete={deletePost}
+        onQuoteCreated={addPost}
         user={user}
       />
     </div>

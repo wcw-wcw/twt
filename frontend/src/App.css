@@ -331,6 +331,20 @@ button:hover {
   font-weight: 700;
 }
 
+.formSuccess {
+  color: #7ee7b1;
+  font-weight: 700;
+}
+
+.formSuccess a {
+  color: #9ddcff;
+  text-decoration: none;
+}
+
+.formSuccess a:hover {
+  text-decoration: underline;
+}
+
 /* Timeline */
 
 .timeline {
@@ -404,6 +418,43 @@ button:hover {
   color: #f5f9ff;
 }
 
+.quotedPostCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid #314154;
+  border-radius: 12px;
+  background: rgba(21, 32, 43, 0.58);
+  color: #e7edf3;
+  text-decoration: none;
+}
+
+.quotedPostCard:hover {
+  border-color: #1d9bf0;
+  background: rgba(29, 155, 240, 0.08);
+}
+
+.quotedPostAuthor {
+  color: #f5f9ff;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.quotedPostContent {
+  color: #cbd8e3;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.quotedPostUnavailable {
+  color: #9fb0c0;
+  font-weight: 700;
+}
+
 .postFooter {
   display: flex;
   justify-content: flex-start;
@@ -427,6 +478,32 @@ button:hover {
 .threadLink:hover,
 .backLink:hover {
   text-decoration: underline;
+}
+
+.quoteButton {
+  padding: 0;
+  background: transparent;
+  color: #1d9bf0;
+}
+
+.quoteButton:hover {
+  background: transparent;
+  color: #9ddcff;
+  text-decoration: underline;
+  transform: none;
+}
+
+.quoteComposer {
+  margin-top: 14px;
+}
+
+.quoteComposer .composer {
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.quoteComposer .composer textarea {
+  min-height: 92px;
 }
 
 .backLink {

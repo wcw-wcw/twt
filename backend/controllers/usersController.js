@@ -1,5 +1,29 @@
 const pool = require("../db")
 
+const mapPostRow = (row) => ({
+  id: row.id,
+  content: row.content,
+  createdAt: row.created_at,
+  parentPostId: row.parent_post_id,
+  quotePostId: row.quote_post_id,
+  replyCount: Number(row.reply_count || 0),
+  quotedPost: row.quoted_post_id ? {
+    id: row.quoted_post_id,
+    content: row.quoted_content,
+    createdAt: row.quoted_created_at,
+    author: {
+      id: row.quoted_author_id,
+      username: row.quoted_username,
+      avatarUrl: row.quoted_avatar_url
+    }
+  } : null,
+  author: {
+    id: row.author_id,
+    username: row.username,
+    avatarUrl: row.avatar_url
+  }
+})
+
 exports.getUserProfile = async (req, res) => {
   const { id } = req.params
 
@@ -68,36 +92,32 @@ exports.getUserPosts = async (req, res) => {
           p.id,
           p.content,
           p.parent_post_id,
+          p.quote_post_id,
           p.created_at,
           COUNT(replies.id) AS reply_count,
           u.id AS author_id,
           u.username,
-          u.avatar_url
+          u.avatar_url,
+          quoted.id AS quoted_post_id,
+          quoted.content AS quoted_content,
+          quoted.created_at AS quoted_created_at,
+          quoted_user.id AS quoted_author_id,
+          quoted_user.username AS quoted_username,
+          quoted_user.avatar_url AS quoted_avatar_url
         FROM posts p
         JOIN users u ON u.id = p.author_id
         LEFT JOIN posts replies ON replies.parent_post_id = p.id
+        LEFT JOIN posts quoted ON quoted.id = p.quote_post_id
+        LEFT JOIN users quoted_user ON quoted_user.id = quoted.author_id
         WHERE p.author_id = $1
           AND p.parent_post_id IS NULL
-        GROUP BY p.id, u.id
+        GROUP BY p.id, u.id, quoted.id, quoted_user.id
         ORDER BY p.created_at DESC
       `,
       [id]
     )
 
-    const posts = result.rows.map((row) => ({
-      id: row.id,
-      content: row.content,
-      createdAt: row.created_at,
-      parentPostId: row.parent_post_id,
-      replyCount: Number(row.reply_count || 0),
-      author: {
-        id: row.author_id,
-        username: row.username,
-        avatarUrl: row.avatar_url
-      }
-    }))
-
-    return res.json(posts)
+    return res.json(result.rows.map(mapPostRow))
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: "Failed to fetch user posts" })

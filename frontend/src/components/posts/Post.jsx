@@ -1,11 +1,34 @@
+import { useState } from "react"
 import Avatar from "../common/Avatar"
 import { Link } from "react-router-dom"
+import PostComposer from "./PostComposer"
 
-function Post({ post, onDelete, user }) {
+function Post({ post, onDelete, onQuoteCreated, user }) {
+  const [showQuoteComposer, setShowQuoteComposer] = useState(false)
+  const [quoteMessage, setQuoteMessage] = useState("")
+
   const date = new Date(post.createdAt)
   const relative = getRelativeTime(date)
 
   const canDelete = user && user.id === post.author?.id
+
+  const handleQuoteClick = () => {
+    setQuoteMessage("")
+
+    if (!user) {
+      setShowQuoteComposer(false)
+      setQuoteMessage("Please log in to quote this post.")
+      return
+    }
+
+    setShowQuoteComposer((current) => !current)
+  }
+
+  const handleQuoteCreated = (quotePost) => {
+    onQuoteCreated?.(quotePost)
+    setShowQuoteComposer(false)
+    setQuoteMessage("Quote posted.")
+  }
 
   return (
     <article className="post">
@@ -34,6 +57,17 @@ function Post({ post, onDelete, user }) {
           <p className="postContent">{post.content}</p>
         </Link>
 
+        {post.quotedPost ? (
+          <Link to={`/post/${post.quotedPost.id}`} className="quotedPostCard">
+            <span className="quotedPostAuthor">@{post.quotedPost.author?.username || "unknown"}</span>
+            <span className="quotedPostContent">{post.quotedPost.content}</span>
+          </Link>
+        ) : post.quotePostId ? (
+          <div className="quotedPostCard quotedPostUnavailable">
+            Original post unavailable.
+          </div>
+        ) : null}
+
         <div className="postFooter">
           <span className="postDate">{date.toLocaleString()}</span>
 
@@ -41,12 +75,43 @@ function Post({ post, onDelete, user }) {
             {post.replyCount || 0} {(post.replyCount || 0) === 1 ? "reply" : "replies"}
           </Link>
 
+          <button type="button" className="quoteButton" onClick={handleQuoteClick}>
+            Quote
+          </button>
+
           {canDelete && (
-            <button className="deleteButton" onClick={() => onDelete(post.id)}>
+            <button type="button" className="deleteButton" onClick={() => onDelete(post.id)}>
               Delete
             </button>
           )}
         </div>
+
+        {quoteMessage && (
+          <p className={user ? "formSuccess" : "formError"}>
+            {quoteMessage}
+            {user && quoteMessage === "Quote posted." && (
+              <>
+                {" "}
+                <Link to={`/profile/${user.id}`}>View on your profile</Link>
+              </>
+            )}
+          </p>
+        )}
+
+        {showQuoteComposer && (
+          <div className="quoteComposer">
+            <PostComposer
+              user={user}
+              onPost={handleQuoteCreated}
+              endpoint={`/api/posts/${post.id}/quote`}
+              submitLabel="Quote"
+              placeholder="Add your comment"
+              loggedOutPlaceholder="Log in to quote"
+              emptyMessage="Quote cannot be empty."
+              loginPrompt="to quote this post."
+            />
+          </div>
+        )}
       </div>
     </article>
   )

@@ -8,6 +8,7 @@ router.get("/", postsController.getPosts)
 router.post("/", auth, postsController.createPost)
 router.get("/:id/thread", postsController.getThread)
 router.post("/:id/replies", auth, postsController.createReply)
+router.post("/:id/quote", auth, postsController.createQuote)
 router.delete("/:id", auth, postsController.deletePost)
 
 module.exports = router

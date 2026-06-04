@@ -4,7 +4,7 @@ import Timeline from "../components/posts/Timeline"
 import Avatar from "../components/common/Avatar"
 import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
-function Profile({ user, onDeletePost }) {
+function Profile({ user, onDeletePost, onQuoteCreated }) {
   const { id } = useParams()
 
   const [profile, setProfile] = useState(null)
@@ -180,6 +180,7 @@ function Profile({ user, onDeletePost }) {
       <Timeline
         posts={posts}
         user={user}
+        onQuoteCreated={onQuoteCreated}
         onDelete={async (postId) => {
           await onDeletePost(postId)
           setPosts((prev) => prev.filter((post) => post.id !== postId))

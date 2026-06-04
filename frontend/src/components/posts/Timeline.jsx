@@ -1,6 +1,6 @@
 import Post from "./Post"
 
-function Timeline({ posts, onDelete, user }) {
+function Timeline({ posts, onDelete, onQuoteCreated, user }) {
   return (
     <div className="timeline">
       {posts.length === 0 && <p className="empty">No posts yet</p>}
@@ -10,6 +10,7 @@ function Timeline({ posts, onDelete, user }) {
           key={post.id}
           post={post}
           onDelete={onDelete}
+          onQuoteCreated={onQuoteCreated}
           user={user}
         />
       ))}
