@@ -4,22 +4,25 @@ import { Link, useParams } from "react-router-dom"
 import Post from "../components/posts/Post"
 import PostComposer from "../components/posts/PostComposer"
 import Timeline from "../components/posts/Timeline"
-import { API_BASE_URL } from "../lib/api"
+import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
-function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
+function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated, onRepostChange }) {
   const { id } = useParams()
 
   const [post, setPost] = useState(null)
   const [replies, setReplies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const currentUserId = user?.id
 
   const loadThread = useCallback(async () => {
     try {
       setLoading(true)
       setError("")
 
-      const res = await fetch(`${API_BASE_URL}/api/posts/${id}/thread`)
+      const res = await fetch(`${API_BASE_URL}/api/posts/${id}/thread`, {
+        headers: getAuthHeaders()
+      })
       const data = await res.json()
 
       if (!res.ok) {
@@ -39,7 +42,7 @@ function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
 
   useEffect(() => {
     void loadThread()
-  }, [loadThread])
+  }, [loadThread, currentUserId])
 
   const handleReplyCreated = (reply) => {
     setReplies((prev) => [...prev, reply])
@@ -58,6 +61,22 @@ function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
     }
 
     setReplies((prev) => prev.filter((reply) => reply.id !== postId))
+  }
+
+  const handleRepostChange = (postId, repostState) => {
+    const applyRepostState = (item) => (
+      item.id === postId
+        ? {
+            ...item,
+            repostCount: repostState.repostCount,
+            hasReposted: repostState.hasReposted
+          }
+        : item
+    )
+
+    setPost((prev) => prev ? applyRepostState(prev) : prev)
+    setReplies((prev) => prev.map(applyRepostState))
+    onRepostChange?.(postId, repostState)
   }
 
   if (loading) {
@@ -80,6 +99,7 @@ function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
         post={post}
         onDelete={handleDelete}
         onQuoteCreated={onQuoteCreated}
+        onRepostChange={handleRepostChange}
         user={user}
       />
 
@@ -110,6 +130,7 @@ function PostThread({ user, onDeletePost, onReplyCreated, onQuoteCreated }) {
           posts={replies}
           onDelete={handleDelete}
           onQuoteCreated={onQuoteCreated}
+          onRepostChange={handleRepostChange}
           user={user}
         />
       )}

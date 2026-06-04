@@ -493,6 +493,33 @@ button:hover {
   transform: none;
 }
 
+.repostButton {
+  padding: 0;
+  background: transparent;
+  color: #7ee7b1;
+}
+
+.repostButton:hover {
+  background: transparent;
+  color: #9ff2c8;
+  text-decoration: underline;
+  transform: none;
+}
+
+.repostButtonActive {
+  color: #35d07f;
+}
+
+.repostButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.repostButton:disabled:hover {
+  color: #7ee7b1;
+  text-decoration: none;
+}
+
 .quoteComposer {
   margin-top: 14px;
 }

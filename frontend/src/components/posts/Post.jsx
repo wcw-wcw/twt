@@ -2,10 +2,13 @@ import { useState } from "react"
 import Avatar from "../common/Avatar"
 import { Link } from "react-router-dom"
 import PostComposer from "./PostComposer"
+import { repostPost, unrepostPost } from "../../lib/api"
 
-function Post({ post, onDelete, onQuoteCreated, user }) {
+function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
   const [showQuoteComposer, setShowQuoteComposer] = useState(false)
   const [quoteMessage, setQuoteMessage] = useState("")
+  const [repostMessage, setRepostMessage] = useState("")
+  const [repostLoading, setRepostLoading] = useState(false)
 
   const date = new Date(post.createdAt)
   const relative = getRelativeTime(date)
@@ -28,6 +31,32 @@ function Post({ post, onDelete, onQuoteCreated, user }) {
     onQuoteCreated?.(quotePost)
     setShowQuoteComposer(false)
     setQuoteMessage("Quote posted.")
+  }
+
+  const handleRepostClick = async () => {
+    setRepostMessage("")
+
+    if (!user) {
+      setRepostMessage("Please log in to repost this post.")
+      return
+    }
+
+    try {
+      setRepostLoading(true)
+
+      const nextState = post.hasReposted
+        ? await unrepostPost(post.id)
+        : await repostPost(post.id)
+
+      onRepostChange?.(post.id, {
+        repostCount: nextState.repostCount,
+        hasReposted: nextState.hasReposted
+      })
+    } catch (error) {
+      setRepostMessage(error.message || "Failed to update repost.")
+    } finally {
+      setRepostLoading(false)
+    }
   }
 
   return (
@@ -75,6 +104,15 @@ function Post({ post, onDelete, onQuoteCreated, user }) {
             {post.replyCount || 0} {(post.replyCount || 0) === 1 ? "reply" : "replies"}
           </Link>
 
+          <button
+            type="button"
+            className={post.hasReposted ? "repostButton repostButtonActive" : "repostButton"}
+            onClick={handleRepostClick}
+            disabled={repostLoading}
+          >
+            {repostLoading ? "Updating..." : `${post.repostCount || 0} ${(post.repostCount || 0) === 1 ? "repost" : "reposts"}`}
+          </button>
+
           <button type="button" className="quoteButton" onClick={handleQuoteClick}>
             Quote
           </button>
@@ -97,6 +135,8 @@ function Post({ post, onDelete, onQuoteCreated, user }) {
             )}
           </p>
         )}
+
+        {repostMessage && <p className="formError">{repostMessage}</p>}
 
         {showQuoteComposer && (
           <div className="quoteComposer">

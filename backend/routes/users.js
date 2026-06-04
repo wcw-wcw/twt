@@ -12,7 +12,7 @@ const {
 } = require("../controllers/usersController")
 
 router.get("/:id", getUserProfile)
-router.get("/:id/posts", getUserPosts)
+router.get("/:id/posts", auth.optional, getUserPosts)
 router.get("/:id/followers", getFollowers)
 router.get("/:id/following", getFollowing)
 

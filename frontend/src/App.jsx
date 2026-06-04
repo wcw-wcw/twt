@@ -14,7 +14,9 @@ function App() {
   const [user, setUser] = useState(null)
 
   const fetchPosts = useCallback(async () => {
-    const res = await fetch(`${API_BASE_URL}/api/posts`)
+    const res = await fetch(`${API_BASE_URL}/api/posts`, {
+      headers: getAuthHeaders()
+    })
     const data = await res.json()
     setPosts(data)
   }, [])
@@ -60,6 +62,18 @@ function App() {
     )))
   }
 
+  const updateRepostState = (postId, repostState) => {
+    setPosts((prev) => prev.map((post) => (
+      post.id === postId
+        ? {
+            ...post,
+            repostCount: repostState.repostCount,
+            hasReposted: repostState.hasReposted
+          }
+        : post
+    )))
+  }
+
   const deletePost = async (id) => {
     const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
       method: "DELETE",
@@ -77,11 +91,16 @@ function App() {
   const login = (loggedInUser, token) => {
     localStorage.setItem("token", token)
     setUser(loggedInUser)
+    void fetchPosts()
   }
 
   const logout = () => {
     localStorage.removeItem("token")
     setUser(null)
+    setPosts((prev) => prev.map((post) => ({
+      ...post,
+      hasReposted: false
+    })))
   }
 
   return (
@@ -94,6 +113,7 @@ function App() {
               posts={posts}
               addPost={addPost}
               deletePost={deletePost}
+              onRepostChange={updateRepostState}
               user={user}
             />
           }
@@ -107,6 +127,7 @@ function App() {
               onDeletePost={deletePost}
               onReplyCreated={incrementReplyCount}
               onQuoteCreated={addPost}
+              onRepostChange={updateRepostState}
             />
           }
         />
@@ -118,6 +139,7 @@ function App() {
               user={user}
               onDeletePost={deletePost}
               onQuoteCreated={addPost}
+              onRepostChange={updateRepostState}
             />
           }
         />

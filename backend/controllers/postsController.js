@@ -7,6 +7,8 @@ const mapPostRow = (row) => ({
   parentPostId: row.parent_post_id,
   quotePostId: row.quote_post_id,
   replyCount: Number(row.reply_count || 0),
+  repostCount: Number(row.repost_count || 0),
+  hasReposted: Boolean(row.has_reposted),
   quotedPost: row.quoted_post_id ? {
     id: row.quoted_post_id,
     content: row.quoted_content,
@@ -24,13 +26,26 @@ const mapPostRow = (row) => ({
   }
 })
 
-const basePostSelect = `
+const basePostSelect = (currentUserParam = null) => `
   p.id,
   p.content,
   p.parent_post_id,
   p.quote_post_id,
   p.created_at,
   COUNT(replies.id) AS reply_count,
+  (
+    SELECT COUNT(*)
+    FROM reposts repost_count
+    WHERE repost_count.post_id = p.id
+  ) AS repost_count,
+  ${currentUserParam ? `
+    EXISTS (
+      SELECT 1
+      FROM reposts current_repost
+      WHERE current_repost.post_id = p.id
+        AND current_repost.user_id = ${currentUserParam}
+    )
+  ` : "false"} AS has_reposted,
   u.id AS author_id,
   u.username,
   u.avatar_url,
@@ -57,16 +72,19 @@ const basePostGroupBy = `
 `
 
 exports.getPosts = async (req, res) => {
+  const currentUserId = req.user?.id
+  const currentUserParam = currentUserId ? "$1" : null
+
   try {
     const result = await pool.query(`
       SELECT
-        ${basePostSelect}
+        ${basePostSelect(currentUserParam)}
       FROM posts p
       ${basePostJoins}
       WHERE p.parent_post_id IS NULL
       GROUP BY ${basePostGroupBy}
       ORDER BY p.created_at DESC
-    `)
+    `, currentUserId ? [currentUserId] : [])
 
     return res.json(result.rows.map(mapPostRow))
   } catch (error) {
@@ -113,6 +131,8 @@ exports.createPost = async (req, res) => {
       quotePostId: post.quote_post_id,
       quotedPost: null,
       replyCount: 0,
+      repostCount: 0,
+      hasReposted: false,
       author: {
         id: author.id,
         username: author.username,
@@ -127,18 +147,21 @@ exports.createPost = async (req, res) => {
 
 exports.getThread = async (req, res) => {
   const { id } = req.params
+  const currentUserId = req.user?.id
+  const currentUserParam = currentUserId ? "$2" : null
+  const queryParams = currentUserId ? [id, currentUserId] : [id]
 
   try {
     const postResult = await pool.query(
       `
         SELECT
-          ${basePostSelect}
+          ${basePostSelect(currentUserParam)}
         FROM posts p
         ${basePostJoins}
         WHERE p.id = $1
         GROUP BY ${basePostGroupBy}
       `,
-      [id]
+      queryParams
     )
 
     const post = postResult.rows[0]
@@ -150,14 +173,14 @@ exports.getThread = async (req, res) => {
     const repliesResult = await pool.query(
       `
         SELECT
-          ${basePostSelect}
+          ${basePostSelect(currentUserParam)}
         FROM posts p
         ${basePostJoins}
         WHERE p.parent_post_id = $1
         GROUP BY ${basePostGroupBy}
         ORDER BY p.created_at ASC
       `,
-      [id]
+      queryParams
     )
 
     return res.json({
@@ -218,6 +241,8 @@ exports.createReply = async (req, res) => {
       quotePostId: reply.quote_post_id,
       quotedPost: null,
       replyCount: 0,
+      repostCount: 0,
+      hasReposted: false,
       author: {
         id: author.id,
         username: author.username,
@@ -265,19 +290,86 @@ exports.createQuote = async (req, res) => {
     const postResult = await pool.query(
       `
         SELECT
-          ${basePostSelect}
+          ${basePostSelect("$2")}
         FROM posts p
         ${basePostJoins}
         WHERE p.id = $1
         GROUP BY ${basePostGroupBy}
       `,
-      [result.rows[0].id]
+      [result.rows[0].id, userId]
     )
 
     return res.status(201).json(mapPostRow(postResult.rows[0]))
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: "Failed to create quote post" })
+  }
+}
+
+exports.repostPost = async (req, res) => {
+  const { id } = req.params
+  const userId = req.user.id
+
+  try {
+    const postResult = await pool.query(
+      `SELECT id FROM posts WHERE id = $1`,
+      [id]
+    )
+
+    if (postResult.rows.length === 0) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    await pool.query(
+      `
+        INSERT INTO reposts (user_id, post_id)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id, post_id) DO NOTHING
+      `,
+      [userId, id]
+    )
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) AS repost_count FROM reposts WHERE post_id = $1`,
+      [id]
+    )
+
+    return res.status(201).json({
+      success: true,
+      postId: id,
+      repostCount: Number(countResult.rows[0].repost_count || 0),
+      hasReposted: true
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Failed to repost" })
+  }
+}
+
+exports.unrepostPost = async (req, res) => {
+  const { id } = req.params
+  const userId = req.user.id
+
+  try {
+    await pool.query(
+      `DELETE FROM reposts WHERE user_id = $1 AND post_id = $2`,
+      [userId, id]
+    )
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) AS repost_count FROM reposts WHERE post_id = $1`,
+      [id]
+    )
+
+    return res.json({
+      success: true,
+      postId: id,
+      repostCount: Number(countResult.rows[0].repost_count || 0),
+      hasReposted: false
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Failed to undo repost" })
   }
 }
 

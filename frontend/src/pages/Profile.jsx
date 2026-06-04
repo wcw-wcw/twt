@@ -4,7 +4,7 @@ import Timeline from "../components/posts/Timeline"
 import Avatar from "../components/common/Avatar"
 import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
-function Profile({ user, onDeletePost, onQuoteCreated }) {
+function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
   const { id } = useParams()
 
   const [profile, setProfile] = useState(null)
@@ -17,6 +17,7 @@ function Profile({ user, onDeletePost, onQuoteCreated }) {
   const [followError, setFollowError] = useState("")
 
   const isOwnProfile = user?.id === id
+  const currentUserId = user?.id
 
   const isFollowing = useMemo(() => {
     if (!user) return false
@@ -30,7 +31,9 @@ function Profile({ user, onDeletePost, onQuoteCreated }) {
 
       const [profileRes, postsRes, followersRes, followingRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/users/${id}`),
-        fetch(`${API_BASE_URL}/api/users/${id}/posts`),
+        fetch(`${API_BASE_URL}/api/users/${id}/posts`, {
+          headers: getAuthHeaders()
+        }),
         fetch(`${API_BASE_URL}/api/users/${id}/followers`),
         fetch(`${API_BASE_URL}/api/users/${id}/following`)
       ])
@@ -60,7 +63,7 @@ function Profile({ user, onDeletePost, onQuoteCreated }) {
 
   useEffect(() => {
     void loadProfileData()
-  }, [loadProfileData])
+  }, [loadProfileData, currentUserId])
 
   const handleToggleFollow = async () => {
     if (!user) {
@@ -91,6 +94,19 @@ function Profile({ user, onDeletePost, onQuoteCreated }) {
     } finally {
       setFollowLoading(false)
     }
+  }
+
+  const handleRepostChange = (postId, repostState) => {
+    setPosts((prev) => prev.map((post) => (
+      post.id === postId
+        ? {
+            ...post,
+            repostCount: repostState.repostCount,
+            hasReposted: repostState.hasReposted
+          }
+        : post
+    )))
+    onRepostChange?.(postId, repostState)
   }
 
   if (loading) {
@@ -181,6 +197,7 @@ function Profile({ user, onDeletePost, onQuoteCreated }) {
         posts={posts}
         user={user}
         onQuoteCreated={onQuoteCreated}
+        onRepostChange={handleRepostChange}
         onDelete={async (postId) => {
           await onDeletePost(postId)
           setPosts((prev) => prev.filter((post) => post.id !== postId))

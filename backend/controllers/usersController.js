@@ -7,6 +7,8 @@ const mapPostRow = (row) => ({
   parentPostId: row.parent_post_id,
   quotePostId: row.quote_post_id,
   replyCount: Number(row.reply_count || 0),
+  repostCount: Number(row.repost_count || 0),
+  hasReposted: Boolean(row.has_reposted),
   quotedPost: row.quoted_post_id ? {
     id: row.quoted_post_id,
     content: row.quoted_content,
@@ -84,6 +86,7 @@ exports.getUserProfile = async (req, res) => {
 
 exports.getUserPosts = async (req, res) => {
   const { id } = req.params
+  const currentUserId = req.user?.id
 
   try {
     const result = await pool.query(
@@ -95,6 +98,19 @@ exports.getUserPosts = async (req, res) => {
           p.quote_post_id,
           p.created_at,
           COUNT(replies.id) AS reply_count,
+          (
+            SELECT COUNT(*)
+            FROM reposts repost_count
+            WHERE repost_count.post_id = p.id
+          ) AS repost_count,
+          ${currentUserId ? `
+            EXISTS (
+              SELECT 1
+              FROM reposts current_repost
+              WHERE current_repost.post_id = p.id
+                AND current_repost.user_id = $2
+            )
+          ` : "false"} AS has_reposted,
           u.id AS author_id,
           u.username,
           u.avatar_url,
@@ -114,7 +130,7 @@ exports.getUserPosts = async (req, res) => {
         GROUP BY p.id, u.id, quoted.id, quoted_user.id
         ORDER BY p.created_at DESC
       `,
-      [id]
+      currentUserId ? [id, currentUserId] : [id]
     )
 
     return res.json(result.rows.map(mapPostRow))
