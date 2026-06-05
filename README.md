@@ -14,6 +14,7 @@ This app deploys to Vercel as a Vite static frontend plus an Express API mounted
 - Reply counts on post cards
 - Quote posts with a compact preview of the referenced post
 - Simple reposts with per-post counts and undo support
+- In-app notifications for follows, replies, mentions, quote posts, and reposts
 - Profile pages with user statistics, following/followers, and top-level posts
 - Following/unfollowing of other users
 - First-pass discovery with clickable @mentions, #hashtags, search, and hashtag pages
@@ -40,7 +41,21 @@ Post content is parsed on the backend for `@mentions` and `#hashtags` when norma
 
 Known mentions and hashtags are returned in post API responses and rendered as safe clickable links in timelines, profile pages, thread pages, replies, quote posts, and quoted-post previews. Mentions link to `/profile/:id`, and hashtags link to `/hashtag/:tag`.
 
-Search at `/search?q=term` is a first-pass implementation that groups users, post content, and hashtags. Hashtag pages show posts associated with a tag. This is not a full ranking, trending, or autocomplete system yet, and mention notifications are intentionally left for a later feature.
+Search at `/search?q=term` is a first-pass implementation that groups users, post content, and hashtags. Hashtag pages show posts associated with a tag. This is not a full ranking, trending, or autocomplete system yet.
+
+## In-app Notifications
+
+Notifications are database-backed records shown inside the app at `/notifications`. Logged-in users can view their own notifications, see an unread count in navigation, mark one notification as read, or mark all notifications as read.
+
+Supported notification types are:
+
+- `follow`
+- `reply`
+- `mention`
+- `quote`
+- `repost`
+
+Notifications are private to the recipient. The backend requires JWT auth for notification routes and only returns or updates notifications owned by the current user. This pass is in-app only; realtime WebSocket updates, email, SMS, and push notifications are future enhancements.
 
 ## Local development
 
@@ -91,14 +106,17 @@ psql "$DATABASE_URL" -f database/migrations/001_post_replies.sql
 psql "$DATABASE_URL" -f database/migrations/002_quote_posts.sql
 psql "$DATABASE_URL" -f database/migrations/003_reposts.sql
 psql "$DATABASE_URL" -f database/migrations/004_discovery.sql
+psql "$DATABASE_URL" -f database/migrations/005_notifications.sql
 ```
 
-The replies and quote-post migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts and discovery migrations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
+The replies and quote-post migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts, discovery, and notifications migrations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
+
+If API smoke tests create temporary `discover_*` or notification smoke-test users/posts in your configured database, they are test data. You can optionally remove those rows after testing with targeted deletes for the specific test usernames you created.
 
 ## Vercel deployment
 
 1. Create a hosted Postgres database. Neon is the simplest fit with Vercel because it has a Vercel Marketplace integration and a free tier.
-2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, and `database/migrations/004_discovery.sql` against an existing hosted database.
+2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, `database/migrations/004_discovery.sql`, and `database/migrations/005_notifications.sql` against an existing hosted database.
 3. Import this repository into Vercel.
 4. Add these Vercel environment variables:
 

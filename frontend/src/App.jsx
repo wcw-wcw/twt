@@ -10,11 +10,13 @@ import Search from "./pages/Search"
 import Hashtag from "./pages/Hashtag"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
-import { API_BASE_URL, getAuthHeaders } from "./lib/api"
+import Notifications from "./pages/Notifications"
+import { API_BASE_URL, fetchUnreadNotificationCount, getAuthHeaders } from "./lib/api"
 
 function App() {
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState(null)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
 
   const fetchPosts = useCallback(async () => {
     const res = await fetch(`${API_BASE_URL}/api/posts`, {
@@ -36,6 +38,7 @@ function App() {
       if (!res.ok) {
         localStorage.removeItem("token")
         setUser(null)
+        setUnreadNotificationCount(0)
         return
       }
 
@@ -44,6 +47,21 @@ function App() {
     } catch (error) {
       console.error("Failed to fetch current user:", error)
       setUser(null)
+      setUnreadNotificationCount(0)
+    }
+  }, [])
+
+  const refreshUnreadNotificationCount = useCallback(async () => {
+    if (!localStorage.getItem("token")) {
+      setUnreadNotificationCount(0)
+      return
+    }
+
+    try {
+      const data = await fetchUnreadNotificationCount()
+      setUnreadNotificationCount(data.unreadCount || 0)
+    } catch (error) {
+      console.error("Failed to fetch unread notifications:", error)
     }
   }, [])
 
@@ -52,6 +70,13 @@ function App() {
     void fetchPosts()
     void fetchCurrentUser()
   }, [fetchPosts, fetchCurrentUser])
+
+  useEffect(() => {
+    if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void refreshUnreadNotificationCount()
+    }
+  }, [refreshUnreadNotificationCount, user])
 
   const addPost = (newPost) => {
     setPosts((prev) => [newPost, ...prev])
@@ -95,11 +120,13 @@ function App() {
     localStorage.setItem("token", token)
     setUser(loggedInUser)
     void fetchPosts()
+    void refreshUnreadNotificationCount()
   }
 
   const logout = () => {
     localStorage.removeItem("token")
     setUser(null)
+    setUnreadNotificationCount(0)
     setPosts((prev) => prev.map((post) => ({
       ...post,
       hasReposted: false
@@ -107,7 +134,11 @@ function App() {
   }
 
   return (
-    <Layout user={user} logout={logout}>
+    <Layout
+      user={user}
+      logout={logout}
+      unreadNotificationCount={unreadNotificationCount}
+    >
       <Routes>
         <Route
           path="/"
@@ -177,6 +208,16 @@ function App() {
               onDeletePost={deletePost}
               onQuoteCreated={addPost}
               onRepostChange={updateRepostState}
+            />
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <Notifications
+              user={user}
+              onUnreadCountChange={refreshUnreadNotificationCount}
             />
           }
         />

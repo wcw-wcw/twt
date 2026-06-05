@@ -1,4 +1,5 @@
 const pool = require("../db")
+const { createNotification } = require("../lib/notifications")
 const {
   basePostGroupBy,
   basePostSelect,
@@ -150,29 +151,48 @@ exports.followUser = async (req, res) => {
     return res.status(400).json({ error: "You cannot follow yourself" })
   }
 
+  const client = await pool.connect()
+
   try {
-    const targetResult = await pool.query(
+    await client.query("BEGIN")
+
+    const targetResult = await client.query(
       `SELECT id FROM users WHERE id = $1`,
       [followingId]
     )
 
     if (targetResult.rows.length === 0) {
+      await client.query("ROLLBACK")
       return res.status(404).json({ error: "User not found" })
     }
 
-    await pool.query(
+    const followResult = await client.query(
       `
         INSERT INTO follows (follower_id, following_id)
         VALUES ($1, $2)
         ON CONFLICT DO NOTHING
+        RETURNING follower_id
       `,
       [followerId, followingId]
     )
 
+    if (followResult.rows.length > 0) {
+      await createNotification(client, {
+        recipientUserId: followingId,
+        actorUserId: followerId,
+        type: "follow"
+      })
+    }
+
+    await client.query("COMMIT")
+
     return res.status(201).json({ success: true })
   } catch (error) {
+    await client.query("ROLLBACK").catch(() => {})
     console.error(error)
     return res.status(500).json({ error: "Failed to follow user" })
+  } finally {
+    client.release()
   }
 }
 

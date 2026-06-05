@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom"
 
-function LeftSidebar({ user }) {
+function LeftSidebar({ user, unreadNotificationCount = 0 }) {
   const navClass = ({ isActive }) =>
     isActive ? "navItem active" : "navItem"
 
@@ -12,9 +12,18 @@ function LeftSidebar({ user }) {
         </NavLink>
 
         {user && (
-          <NavLink to={`/profile/${user.id}`} className={navClass}>
-            Profile
-          </NavLink>
+          <>
+            <NavLink to="/notifications" className={navClass}>
+              <span>Notifications</span>
+              {unreadNotificationCount > 0 && (
+                <span className="navBadge">{unreadNotificationCount}</span>
+              )}
+            </NavLink>
+
+            <NavLink to={`/profile/${user.id}`} className={navClass}>
+              Profile
+            </NavLink>
+          </>
         )}
 
         <NavLink to="/search" className={navClass}>

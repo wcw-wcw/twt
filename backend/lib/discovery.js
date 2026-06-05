@@ -29,6 +29,7 @@ const extractHashtags = (content) => {
 const savePostDiscovery = async (client, postId, content) => {
   const mentions = extractMentions(content)
   const hashtags = extractHashtags(content)
+  const mentionedUsers = []
 
   if (mentions.length > 0) {
     const usersResult = await client.query(
@@ -49,6 +50,7 @@ const savePostDiscovery = async (client, postId, content) => {
         `,
         [postId, user.id, user.username]
       )
+      mentionedUsers.push(user)
     }
   }
 
@@ -71,6 +73,11 @@ const savePostDiscovery = async (client, postId, content) => {
       `,
       [postId, hashtagResult.rows[0].id]
     )
+  }
+
+  return {
+    mentionedUsers,
+    hashtags
   }
 }
 

@@ -46,3 +46,37 @@ export const unrepostPost = async (postId) => {
 
   return parseJson(res)
 }
+
+export const fetchNotifications = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/notifications`, {
+    headers: getAuthHeaders()
+  })
+
+  return parseJson(res)
+}
+
+export const fetchUnreadNotificationCount = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, {
+    headers: getAuthHeaders()
+  })
+
+  return parseJson(res)
+}
+
+export const markNotificationRead = async (notificationId) => {
+  const res = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}/read`, {
+    method: "PATCH",
+    headers: getAuthHeaders()
+  })
+
+  return parseJson(res)
+}
+
+export const markAllNotificationsRead = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
+    method: "PATCH",
+    headers: getAuthHeaders()
+  })
+
+  return parseJson(res)
+}

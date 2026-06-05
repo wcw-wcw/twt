@@ -171,6 +171,65 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.secondaryButton {
+  border: 1px solid #314154;
+  background: transparent;
+  color: #e7edf3;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.secondaryButton:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.secondaryButton:disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
+.notificationTopLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #e7edf3;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.notificationTopLink:hover {
+  background: rgba(29, 155, 240, 0.12);
+  color: #9ddcff;
+}
+
+.topBadge,
+.navBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #e0245e;
+  color: white;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.topBadge {
+  margin-left: 7px;
+}
+
 /* Sidebar */
 
 .sidebarNav {
@@ -182,6 +241,7 @@ body {
 .navItem {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   width: fit-content;
   padding: 12px 18px;
   border-radius: 999px;
@@ -190,6 +250,10 @@ body {
   font-size: 1.65rem;
   font-weight: 700;
   transition: background 0.2s ease, color 0.2s ease;
+}
+
+.navBadge {
+  font-size: 0.72rem;
 }
 
 .navItem:hover {
@@ -792,6 +856,86 @@ button:hover {
   box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.18);
 }
 
+/* Notifications */
+
+.notificationsHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.notificationList {
+  display: grid;
+  gap: 12px;
+}
+
+.notificationItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #253341;
+  border-radius: 16px;
+  background: #1b2735;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+.notificationItem.unread {
+  border-color: rgba(29, 155, 240, 0.62);
+  background: #1f3042;
+}
+
+.notificationContent {
+  min-width: 0;
+}
+
+.notificationContent p {
+  margin: 0;
+  color: #eef4fb;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.notificationActor {
+  color: #f5f9ff;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.notificationActor:hover {
+  color: #1d9bf0;
+  text-decoration: underline;
+}
+
+.notificationMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  color: #8ea2b6;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.notificationMeta a {
+  color: #9ddcff;
+  text-decoration: none;
+}
+
+.notificationMeta a:hover {
+  color: #1d9bf0;
+  text-decoration: underline;
+}
+
+.notificationReadButton {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* Utility */
 
 .empty {
@@ -843,6 +987,15 @@ button:hover {
 
   .profileJoinedDate {
     white-space: normal;
+  }
+
+  .notificationsHeader,
+  .notificationItem {
+    flex-direction: column;
+  }
+
+  .notificationReadButton {
+    width: 100%;
   }
 }
 

@@ -1,6 +1,10 @@
 const pool = require("../db")
 const { savePostDiscovery } = require("../lib/discovery")
 const {
+  createMentionNotifications,
+  createNotification
+} = require("../lib/notifications")
+const {
   basePostGroupBy,
   basePostJoins,
   basePostSelect,
@@ -72,7 +76,12 @@ exports.createPost = async (req, res) => {
       [content, userId]
     )
 
-    await savePostDiscovery(client, result.rows[0].id, content)
+    const discovery = await savePostDiscovery(client, result.rows[0].id, content)
+    await createMentionNotifications(client, {
+      mentionedUsers: discovery.mentionedUsers,
+      actorUserId: userId,
+      sourcePostId: result.rows[0].id
+    })
     const post = await fetchPostById(client, result.rows[0].id, userId)
 
     await client.query("COMMIT")
@@ -154,7 +163,7 @@ exports.createReply = async (req, res) => {
     await client.query("BEGIN")
 
     const parentResult = await client.query(
-      `SELECT id FROM posts WHERE id = $1`,
+      `SELECT id, author_id FROM posts WHERE id = $1`,
       [id]
     )
 
@@ -172,8 +181,23 @@ exports.createReply = async (req, res) => {
       [content, userId, id]
     )
 
-    await savePostDiscovery(client, result.rows[0].id, content)
-    const reply = await fetchPostById(client, result.rows[0].id, userId)
+    const replyId = result.rows[0].id
+    await createNotification(client, {
+      recipientUserId: parentResult.rows[0].author_id,
+      actorUserId: userId,
+      type: "reply",
+      postId: id,
+      sourcePostId: replyId
+    })
+
+    const discovery = await savePostDiscovery(client, replyId, content)
+    await createMentionNotifications(client, {
+      mentionedUsers: discovery.mentionedUsers,
+      actorUserId: userId,
+      postId: id,
+      sourcePostId: replyId
+    })
+    const reply = await fetchPostById(client, replyId, userId)
 
     await client.query("COMMIT")
 
@@ -206,7 +230,7 @@ exports.createQuote = async (req, res) => {
     await client.query("BEGIN")
 
     const quotedResult = await client.query(
-      `SELECT id FROM posts WHERE id = $1`,
+      `SELECT id, author_id FROM posts WHERE id = $1`,
       [id]
     )
 
@@ -224,8 +248,23 @@ exports.createQuote = async (req, res) => {
       [content, userId, id]
     )
 
-    await savePostDiscovery(client, result.rows[0].id, content)
-    const post = await fetchPostById(client, result.rows[0].id, userId)
+    const quoteId = result.rows[0].id
+    await createNotification(client, {
+      recipientUserId: quotedResult.rows[0].author_id,
+      actorUserId: userId,
+      type: "quote",
+      postId: id,
+      sourcePostId: quoteId
+    })
+
+    const discovery = await savePostDiscovery(client, quoteId, content)
+    await createMentionNotifications(client, {
+      mentionedUsers: discovery.mentionedUsers,
+      actorUserId: userId,
+      postId: id,
+      sourcePostId: quoteId
+    })
+    const post = await fetchPostById(client, quoteId, userId)
 
     await client.query("COMMIT")
 
@@ -242,30 +281,46 @@ exports.createQuote = async (req, res) => {
 exports.repostPost = async (req, res) => {
   const { id } = req.params
   const userId = req.user.id
+  const client = await pool.connect()
 
   try {
-    const postResult = await pool.query(
-      `SELECT id FROM posts WHERE id = $1`,
+    await client.query("BEGIN")
+
+    const postResult = await client.query(
+      `SELECT id, author_id FROM posts WHERE id = $1`,
       [id]
     )
 
     if (postResult.rows.length === 0) {
+      await client.query("ROLLBACK")
       return res.status(404).json({ error: "Post not found" })
     }
 
-    await pool.query(
+    const repostResult = await client.query(
       `
         INSERT INTO reposts (user_id, post_id)
         VALUES ($1, $2)
         ON CONFLICT (user_id, post_id) DO NOTHING
+        RETURNING user_id
       `,
       [userId, id]
     )
 
-    const countResult = await pool.query(
+    if (repostResult.rows.length > 0) {
+      await createNotification(client, {
+        recipientUserId: postResult.rows[0].author_id,
+        actorUserId: userId,
+        type: "repost",
+        postId: id
+      })
+    }
+
+    const countResult = await client.query(
       `SELECT COUNT(*) AS repost_count FROM reposts WHERE post_id = $1`,
       [id]
     )
+
+    await client.query("COMMIT")
 
     return res.status(201).json({
       success: true,
@@ -274,8 +329,11 @@ exports.repostPost = async (req, res) => {
       hasReposted: true
     })
   } catch (error) {
+    await client.query("ROLLBACK").catch(() => {})
     console.error(error)
     return res.status(500).json({ error: "Failed to repost" })
+  } finally {
+    client.release()
   }
 }
 

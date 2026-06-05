@@ -2,7 +2,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useState } from "react"
 import Avatar from "../common/Avatar"
 
-function TopBar({ user, logout }) {
+function TopBar({ user, logout, unreadNotificationCount = 0 }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get("q") || "")
@@ -35,6 +35,13 @@ function TopBar({ user, logout }) {
         <div className="topBarAuth">
           {user ? (
             <>
+              <Link to="/notifications" className="notificationTopLink" aria-label="Notifications">
+                <span>Notifications</span>
+                {unreadNotificationCount > 0 && (
+                  <span className="topBadge">{unreadNotificationCount}</span>
+                )}
+              </Link>
+
               <Link to={`/profile/${user.id}`} className="topBarProfile">
                 <Avatar
                   src={user.avatarUrl}
