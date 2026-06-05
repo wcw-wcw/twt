@@ -2,6 +2,7 @@ import { useState } from "react"
 import Avatar from "../common/Avatar"
 import { Link } from "react-router-dom"
 import PostComposer from "./PostComposer"
+import PostContent from "./PostContent"
 import { repostPost, unrepostPost } from "../../lib/api"
 
 function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
@@ -13,7 +14,7 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
   const date = new Date(post.createdAt)
   const relative = getRelativeTime(date)
 
-  const canDelete = user && user.id === post.author?.id
+  const canDelete = Boolean(onDelete && user && user.id === post.author?.id)
 
   const handleQuoteClick = () => {
     setQuoteMessage("")
@@ -88,15 +89,27 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
           </div>
         </div>
 
-        <Link to={`/post/${post.id}`} className="postContentLink">
-          <p className="postContent">{post.content}</p>
-        </Link>
+        <PostContent
+          content={post.content}
+          mentionedUsers={post.mentionedUsers}
+          hashtags={post.hashtags}
+        />
 
         {post.quotedPost ? (
-          <Link to={`/post/${post.quotedPost.id}`} className="quotedPostCard">
-            <span className="quotedPostAuthor">@{post.quotedPost.author?.username || "unknown"}</span>
-            <span className="quotedPostContent">{post.quotedPost.content}</span>
-          </Link>
+          <div className="quotedPostCard">
+            <Link to={`/profile/${post.quotedPost.author?.id}`} className="quotedPostAuthor">
+              @{post.quotedPost.author?.username || "unknown"}
+            </Link>
+            <PostContent
+              content={post.quotedPost.content}
+              mentionedUsers={post.quotedPost.mentionedUsers}
+              hashtags={post.quotedPost.hashtags}
+              className="quotedPostContent"
+            />
+            <Link to={`/post/${post.quotedPost.id}`} className="quotedPostThreadLink">
+              View thread
+            </Link>
+          </div>
         ) : post.quotePostId ? (
           <div className="quotedPostCard quotedPostUnavailable">
             Original post unavailable.

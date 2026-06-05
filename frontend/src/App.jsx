@@ -6,6 +6,8 @@ import Home from "./pages/Home"
 import Profile from "./pages/Profile"
 import ProfileConnections from "./pages/ProfileConnections"
 import PostThread from "./pages/PostThread"
+import Search from "./pages/Search"
+import Hashtag from "./pages/Hashtag"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import { API_BASE_URL, getAuthHeaders } from "./lib/api"
@@ -127,6 +129,30 @@ function App() {
               user={user}
               onDeletePost={deletePost}
               onReplyCreated={incrementReplyCount}
+              onQuoteCreated={addPost}
+              onRepostChange={updateRepostState}
+            />
+          }
+        />
+
+        <Route
+          path="/search"
+          element={
+            <Search
+              user={user}
+              onDeletePost={deletePost}
+              onQuoteCreated={addPost}
+              onRepostChange={updateRepostState}
+            />
+          }
+        />
+
+        <Route
+          path="/hashtag/:tag"
+          element={
+            <Hashtag
+              user={user}
+              onDeletePost={deletePost}
               onQuoteCreated={addPost}
               onRepostChange={updateRepostState}
             />

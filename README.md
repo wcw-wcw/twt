@@ -16,6 +16,7 @@ This app deploys to Vercel as a Vite static frontend plus an Express API mounted
 - Simple reposts with per-post counts and undo support
 - Profile pages with user statistics, following/followers, and top-level posts
 - Following/unfollowing of other users
+- First-pass discovery with clickable @mentions, #hashtags, search, and hashtag pages
 
 ## Replies / Threads
 
@@ -32,6 +33,14 @@ Quote posts are stored as normal top-level posts with a nullable `quote_post_id`
 Reposts are textless shares stored in the separate `reposts` table. They do not create a new row in `posts`, and each user can repost a given post once. Logged-in users can repost or undo a repost from post cards, and cards show the current repost count.
 
 Quote posts and reposts are intentionally separate concepts: quote posts are posts with new text plus a reference to another post, while reposts are no-text shares represented only by `(user_id, post_id)` rows.
+
+## Discovery
+
+Post content is parsed on the backend for `@mentions` and `#hashtags` when normal posts, replies, and quote posts are created. Mentions resolve existing users only; unresolved `@text` remains normal post text and does not block creation. Hashtags are stored lowercase without the `#` symbol.
+
+Known mentions and hashtags are returned in post API responses and rendered as safe clickable links in timelines, profile pages, thread pages, replies, quote posts, and quoted-post previews. Mentions link to `/profile/:id`, and hashtags link to `/hashtag/:tag`.
+
+Search at `/search?q=term` is a first-pass implementation that groups users, post content, and hashtags. Hashtag pages show posts associated with a tag. This is not a full ranking, trending, or autocomplete system yet, and mention notifications are intentionally left for a later feature.
 
 ## Local development
 
@@ -81,14 +90,15 @@ For an existing local or Neon database, run the replies migration after deployin
 psql "$DATABASE_URL" -f database/migrations/001_post_replies.sql
 psql "$DATABASE_URL" -f database/migrations/002_quote_posts.sql
 psql "$DATABASE_URL" -f database/migrations/003_reposts.sql
+psql "$DATABASE_URL" -f database/migrations/004_discovery.sql
 ```
 
-The replies and quote-post migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts migration uses `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
+The replies and quote-post migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts and discovery migrations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
 
 ## Vercel deployment
 
 1. Create a hosted Postgres database. Neon is the simplest fit with Vercel because it has a Vercel Marketplace integration and a free tier.
-2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, and `database/migrations/003_reposts.sql` against an existing hosted database.
+2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, and `database/migrations/004_discovery.sql` against an existing hosted database.
 3. Import this repository into Vercel.
 4. Add these Vercel environment variables:
 

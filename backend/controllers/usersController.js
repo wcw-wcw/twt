@@ -1,36 +1,9 @@
 const pool = require("../db")
-
-const mapPostRow = (row) => ({
-  id: row.id,
-  content: row.content,
-  createdAt: row.created_at,
-  parentPostId: row.parent_post_id,
-  quotePostId: row.quote_post_id,
-  replyCount: Number(row.reply_count || 0),
-  repostCount: Number(row.repost_count || 0),
-  hasReposted: Boolean(row.has_reposted),
-  repostedAt: row.reposted_at || null,
-  repostedBy: row.reposted_by_id ? {
-    id: row.reposted_by_id,
-    username: row.reposted_by_username,
-    avatarUrl: row.reposted_by_avatar_url
-  } : null,
-  quotedPost: row.quoted_post_id ? {
-    id: row.quoted_post_id,
-    content: row.quoted_content,
-    createdAt: row.quoted_created_at,
-    author: {
-      id: row.quoted_author_id,
-      username: row.quoted_username,
-      avatarUrl: row.quoted_avatar_url
-    }
-  } : null,
-  author: {
-    id: row.author_id,
-    username: row.username,
-    avatarUrl: row.avatar_url
-  }
-})
+const {
+  basePostGroupBy,
+  basePostSelect,
+  mapPostRow
+} = require("../lib/postRows")
 
 exports.getUserProfile = async (req, res) => {
   const { id } = req.params
@@ -134,38 +107,11 @@ exports.getUserPosts = async (req, res) => {
             AND p.author_id <> $1
         )
         SELECT
-          pt.id,
-          pt.content,
-          pt.parent_post_id,
-          pt.quote_post_id,
-          pt.created_at,
           pt.reposted_at,
           pt.reposted_by_id,
           pt.reposted_by_username,
           pt.reposted_by_avatar_url,
-          COUNT(replies.id) AS reply_count,
-          (
-            SELECT COUNT(*)
-            FROM reposts repost_count
-            WHERE repost_count.post_id = pt.id
-          ) AS repost_count,
-          ${currentUserId ? `
-            EXISTS (
-              SELECT 1
-              FROM reposts current_repost
-              WHERE current_repost.post_id = pt.id
-                AND current_repost.user_id = $2
-            )
-          ` : "false"} AS has_reposted,
-          u.id AS author_id,
-          u.username,
-          u.avatar_url,
-          quoted.id AS quoted_post_id,
-          quoted.content AS quoted_content,
-          quoted.created_at AS quoted_created_at,
-          quoted_user.id AS quoted_author_id,
-          quoted_user.username AS quoted_username,
-          quoted_user.avatar_url AS quoted_avatar_url
+          ${basePostSelect(currentUserId ? "$2" : null)}
         FROM profile_timeline pt
         JOIN posts p ON p.id = pt.id
         JOIN users u ON u.id = p.author_id
@@ -183,10 +129,7 @@ exports.getUserPosts = async (req, res) => {
           pt.reposted_by_id,
           pt.reposted_by_username,
           pt.reposted_by_avatar_url,
-          p.id,
-          u.id,
-          quoted.id,
-          quoted_user.id
+          ${basePostGroupBy}
         ORDER BY pt.timeline_created_at DESC
       `,
       currentUserId ? [id, currentUserId] : [id]

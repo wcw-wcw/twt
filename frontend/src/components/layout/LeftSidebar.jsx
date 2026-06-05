@@ -17,7 +17,9 @@ function LeftSidebar({ user }) {
           </NavLink>
         )}
 
-        <div className="navItem navItemStatic">Explore</div>
+        <NavLink to="/search" className={navClass}>
+          Explore
+        </NavLink>
         <div className="navItem navItemStatic">Settings</div>
       </nav>
     </aside>

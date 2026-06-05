@@ -95,6 +95,27 @@ body {
   gap: 12px;
 }
 
+.topBarSearch {
+  flex: 1;
+  max-width: 360px;
+}
+
+.topBarSearch input {
+  width: 100%;
+  border: 1px solid #2c3c4c;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: #eff3f4;
+  color: #111827;
+  outline: none;
+  font-size: 0.98rem;
+}
+
+.topBarSearch input:focus {
+  border-color: #1d9bf0;
+  box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.18);
+}
+
 .topBarProfile {
   display: inline-flex;
   align-items: center;
@@ -423,13 +444,15 @@ button:hover {
   word-break: break-word;
 }
 
-.postContentLink {
-  color: inherit;
+.inlineTokenLink {
+  color: #9ddcff;
+  font-weight: 800;
   text-decoration: none;
 }
 
-.postContentLink:hover .postContent {
-  color: #f5f9ff;
+.inlineTokenLink:hover {
+  color: #1d9bf0;
+  text-decoration: underline;
 }
 
 .quotedPostCard {
@@ -443,7 +466,6 @@ button:hover {
   border-radius: 12px;
   background: rgba(21, 32, 43, 0.58);
   color: #e7edf3;
-  text-decoration: none;
 }
 
 .quotedPostCard:hover {
@@ -455,13 +477,34 @@ button:hover {
   color: #f5f9ff;
   font-size: 0.92rem;
   font-weight: 800;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.quotedPostAuthor:hover {
+  color: #1d9bf0;
+  text-decoration: underline;
 }
 
 .quotedPostContent {
+  margin: 0;
   color: #cbd8e3;
   font-size: 0.95rem;
   line-height: 1.45;
   word-break: break-word;
+}
+
+.quotedPostThreadLink {
+  width: fit-content;
+  color: #1d9bf0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.quotedPostThreadLink:hover {
+  color: #9ddcff;
+  text-decoration: underline;
 }
 
 .quotedPostUnavailable {
@@ -665,6 +708,64 @@ button:hover {
   line-height: 1.2;
 }
 
+.pageHeader {
+  margin-bottom: 20px;
+}
+
+.pageHeader h2 {
+  margin: 0;
+  color: #f5f9ff;
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+
+.pageHeader p {
+  margin: 8px 0 0;
+  color: #9fb0c0;
+  font-weight: 800;
+}
+
+.resultSection {
+  margin-top: 26px;
+}
+
+.resultSection h3 {
+  margin: 0 0 12px;
+  color: #f5f9ff;
+  font-size: 1.1rem;
+}
+
+.hashtagResultList {
+  display: grid;
+  gap: 10px;
+}
+
+.hashtagResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: #e7edf3;
+  text-decoration: none;
+  border-bottom: 1px solid #253341;
+}
+
+.hashtagResult:hover span {
+  color: #1d9bf0;
+}
+
+.hashtagResult span {
+  color: #f5f9ff;
+  font-weight: 800;
+}
+
+.hashtagResult small {
+  flex-shrink: 0;
+  color: #8ea2b6;
+  font-weight: 800;
+}
+
 .connectionsHeader {
   margin-bottom: 16px;
 }
@@ -717,6 +818,10 @@ button:hover {
 
   .topBarInner {
     padding: 0 18px;
+  }
+
+  .topBarSearch {
+    max-width: 220px;
   }
 
   .mainContent {
