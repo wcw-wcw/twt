@@ -71,6 +71,12 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
       </div>
 
       <div className="postBody">
+        {post.repostedBy && (
+          <Link to={`/profile/${post.repostedBy.id}`} className="repostedByLine">
+            Reposted by @{post.repostedBy.username}
+          </Link>
+        )}
+
         <div className="postHeader">
           <div className="postIdentity">
             <Link to={`/profile/${post.author?.id}`} className="postAuthorLink">
@@ -100,20 +106,20 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
         <div className="postFooter">
           <span className="postDate">{date.toLocaleString()}</span>
 
-          <Link to={`/post/${post.id}`} className="threadLink">
+          <Link to={`/post/${post.id}`} className="postActionLink threadLink">
             {post.replyCount || 0} {(post.replyCount || 0) === 1 ? "reply" : "replies"}
           </Link>
 
           <button
             type="button"
-            className={post.hasReposted ? "repostButton repostButtonActive" : "repostButton"}
+            className={post.hasReposted ? "postActionButton repostButton repostButtonActive" : "postActionButton repostButton"}
             onClick={handleRepostClick}
             disabled={repostLoading}
           >
             {repostLoading ? "Updating..." : `${post.repostCount || 0} ${(post.repostCount || 0) === 1 ? "repost" : "reposts"}`}
           </button>
 
-          <button type="button" className="quoteButton" onClick={handleQuoteClick}>
+          <button type="button" className="postActionButton quoteButton" onClick={handleQuoteClick}>
             Quote
           </button>
 

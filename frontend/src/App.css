@@ -376,7 +376,7 @@ button:hover {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 0.92rem;
 }
 
 .postIdentity {
@@ -399,6 +399,20 @@ button:hover {
 .postDot,
 .postRelativeTime {
   color: #8ea2b6;
+}
+
+.repostedByLine {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: #7ee7b1;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.repostedByLine:hover {
+  color: #9ff2c8;
+  text-decoration: underline;
 }
 
 .postContent {
@@ -459,13 +473,13 @@ button:hover {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
 .postDate {
   color: #8ea2b6;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
 }
 
 .threadLink,
@@ -478,6 +492,24 @@ button:hover {
 .threadLink:hover,
 .backLink:hover {
   text-decoration: underline;
+}
+
+.postActionLink,
+.postActionButton {
+  font-size: 0.9rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.postActionButton {
+  padding: 0;
+  border-radius: 0;
+}
+
+.postActionButton:focus-visible,
+.postActionLink:focus-visible {
+  outline: 2px solid rgba(157, 220, 255, 0.7);
+  outline-offset: 3px;
 }
 
 .quoteButton {
@@ -555,6 +587,110 @@ button:hover {
   background: #c81d53;
 }
 
+/* Profile */
+
+.profileHeader {
+  background: #1b2735;
+  border: 1px solid #253341;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 22px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+.profileHeaderMain {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.profileIdentityBlock {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.profileIdentityText {
+  min-width: 0;
+}
+
+.profileIdentityText h1 {
+  margin: 0;
+  color: #f5f9ff;
+  font-size: 2rem;
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.profileStats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+  color: #dce7f1;
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.profileStats a {
+  color: #dce7f1;
+  text-decoration: none;
+}
+
+.profileStats a:hover {
+  color: #1d9bf0;
+  text-decoration: underline;
+}
+
+.profileJoinedDate {
+  margin: 4px 0 0;
+  color: #8ea2b6;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profileFollowAction {
+  margin-top: 16px;
+}
+
+.profilePage h2,
+.connectionsHeader h2 {
+  margin: 0 0 16px;
+  color: #f5f9ff;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.connectionsHeader {
+  margin-bottom: 16px;
+}
+
+.connectionsHeader p {
+  margin: 4px 0 0;
+  color: #8ea2b6;
+  font-weight: 800;
+}
+
+.connectionSearch {
+  width: 100%;
+  border: 1px solid #2c3c4c;
+  border-radius: 12px;
+  padding: 13px 15px;
+  background: #eff3f4;
+  color: #111827;
+  outline: none;
+  font-size: 1rem;
+}
+
+.connectionSearch:focus {
+  border-color: #1d9bf0;
+  box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.18);
+}
+
 /* Utility */
 
 .empty {
@@ -593,6 +729,15 @@ button:hover {
 
   .topBarUsername {
     display: none;
+  }
+
+  .profileHeaderMain {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .profileJoinedDate {
+    white-space: normal;
   }
 }
 

@@ -9,6 +9,12 @@ const mapPostRow = (row) => ({
   replyCount: Number(row.reply_count || 0),
   repostCount: Number(row.repost_count || 0),
   hasReposted: Boolean(row.has_reposted),
+  repostedAt: row.reposted_at || null,
+  repostedBy: row.reposted_by_id ? {
+    id: row.reposted_by_id,
+    username: row.reposted_by_username,
+    avatarUrl: row.reposted_by_avatar_url
+  } : null,
   quotedPost: row.quoted_post_id ? {
     id: row.quoted_post_id,
     content: row.quoted_content,
@@ -91,23 +97,63 @@ exports.getUserPosts = async (req, res) => {
   try {
     const result = await pool.query(
       `
+        WITH profile_timeline AS (
+          SELECT
+            p.id,
+            p.content,
+            p.parent_post_id,
+            p.quote_post_id,
+            p.created_at,
+            p.created_at AS timeline_created_at,
+            NULL::timestamp AS reposted_at,
+            NULL::uuid AS reposted_by_id,
+            NULL::varchar AS reposted_by_username,
+            NULL::text AS reposted_by_avatar_url
+          FROM posts p
+          WHERE p.author_id = $1
+            AND p.parent_post_id IS NULL
+
+          UNION ALL
+
+          SELECT
+            p.id,
+            p.content,
+            p.parent_post_id,
+            p.quote_post_id,
+            p.created_at,
+            r.created_at AS timeline_created_at,
+            r.created_at AS reposted_at,
+            repost_user.id AS reposted_by_id,
+            repost_user.username AS reposted_by_username,
+            repost_user.avatar_url AS reposted_by_avatar_url
+          FROM reposts r
+          JOIN posts p ON p.id = r.post_id
+          JOIN users repost_user ON repost_user.id = r.user_id
+          WHERE r.user_id = $1
+            AND p.parent_post_id IS NULL
+            AND p.author_id <> $1
+        )
         SELECT
-          p.id,
-          p.content,
-          p.parent_post_id,
-          p.quote_post_id,
-          p.created_at,
+          pt.id,
+          pt.content,
+          pt.parent_post_id,
+          pt.quote_post_id,
+          pt.created_at,
+          pt.reposted_at,
+          pt.reposted_by_id,
+          pt.reposted_by_username,
+          pt.reposted_by_avatar_url,
           COUNT(replies.id) AS reply_count,
           (
             SELECT COUNT(*)
             FROM reposts repost_count
-            WHERE repost_count.post_id = p.id
+            WHERE repost_count.post_id = pt.id
           ) AS repost_count,
           ${currentUserId ? `
             EXISTS (
               SELECT 1
               FROM reposts current_repost
-              WHERE current_repost.post_id = p.id
+              WHERE current_repost.post_id = pt.id
                 AND current_repost.user_id = $2
             )
           ` : "false"} AS has_reposted,
@@ -120,15 +166,28 @@ exports.getUserPosts = async (req, res) => {
           quoted_user.id AS quoted_author_id,
           quoted_user.username AS quoted_username,
           quoted_user.avatar_url AS quoted_avatar_url
-        FROM posts p
+        FROM profile_timeline pt
+        JOIN posts p ON p.id = pt.id
         JOIN users u ON u.id = p.author_id
-        LEFT JOIN posts replies ON replies.parent_post_id = p.id
-        LEFT JOIN posts quoted ON quoted.id = p.quote_post_id
+        LEFT JOIN posts replies ON replies.parent_post_id = pt.id
+        LEFT JOIN posts quoted ON quoted.id = pt.quote_post_id
         LEFT JOIN users quoted_user ON quoted_user.id = quoted.author_id
-        WHERE p.author_id = $1
-          AND p.parent_post_id IS NULL
-        GROUP BY p.id, u.id, quoted.id, quoted_user.id
-        ORDER BY p.created_at DESC
+        GROUP BY
+          pt.id,
+          pt.content,
+          pt.parent_post_id,
+          pt.quote_post_id,
+          pt.created_at,
+          pt.timeline_created_at,
+          pt.reposted_at,
+          pt.reposted_by_id,
+          pt.reposted_by_username,
+          pt.reposted_by_avatar_url,
+          p.id,
+          u.id,
+          quoted.id,
+          quoted_user.id
+        ORDER BY pt.timeline_created_at DESC
       `,
       currentUserId ? [id, currentUserId] : [id]
     )

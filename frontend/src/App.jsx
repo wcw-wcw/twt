@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom"
 import Layout from "./components/layout/Layout"
 import Home from "./pages/Home"
 import Profile from "./pages/Profile"
+import ProfileConnections from "./pages/ProfileConnections"
 import PostThread from "./pages/PostThread"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
@@ -130,6 +131,16 @@ function App() {
               onRepostChange={updateRepostState}
             />
           }
+        />
+
+        <Route
+          path="/profile/:id/followers"
+          element={<ProfileConnections type="followers" />}
+        />
+
+        <Route
+          path="/profile/:id/following"
+          element={<ProfileConnections type="following" />}
         />
 
         <Route

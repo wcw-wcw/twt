@@ -10,7 +10,6 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
   const [profile, setProfile] = useState(null)
   const [posts, setPosts] = useState([])
   const [followers, setFollowers] = useState([])
-  const [following, setFollowing] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [followLoading, setFollowLoading] = useState(false)
@@ -29,31 +28,27 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
       setLoading(true)
       setError("")
 
-      const [profileRes, postsRes, followersRes, followingRes] = await Promise.all([
+      const [profileRes, postsRes, followersRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/users/${id}`),
         fetch(`${API_BASE_URL}/api/users/${id}/posts`, {
           headers: getAuthHeaders()
         }),
-        fetch(`${API_BASE_URL}/api/users/${id}/followers`),
-        fetch(`${API_BASE_URL}/api/users/${id}/following`)
+        fetch(`${API_BASE_URL}/api/users/${id}/followers`)
       ])
 
-      const [profileData, postsData, followersData, followingData] = await Promise.all([
+      const [profileData, postsData, followersData] = await Promise.all([
         profileRes.json(),
         postsRes.json(),
-        followersRes.json(),
-        followingRes.json()
+        followersRes.json()
       ])
 
       if (!profileRes.ok) throw new Error(profileData.error || "Failed to load profile")
       if (!postsRes.ok) throw new Error(postsData.error || "Failed to load posts")
       if (!followersRes.ok) throw new Error(followersData.error || "Failed to load followers")
-      if (!followingRes.ok) throw new Error(followingData.error || "Failed to load following")
 
       setProfile(profileData)
       setPosts(postsData)
       setFollowers(followersData)
-      setFollowing(followingData)
     } catch (error) {
       setError(error.message)
     } finally {
@@ -105,6 +100,10 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
             hasReposted: repostState.hasReposted
           }
         : post
+    )).filter((post) => (
+      repostState.hasReposted ||
+      post.id !== postId ||
+      post.repostedBy?.id !== user?.id
     )))
     onRepostChange?.(postId, repostState)
   }
@@ -119,31 +118,38 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
 
   return (
     <div className="profilePage">
-      <header className="post">
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", width: "100%" }}>
-          <Avatar
-            src={profile.avatarUrl}
-            name={profile.username}
-            alt={`${profile.username} avatar`}
-            size={72}
-          />
+      <header className="profileHeader">
+        <div className="profileHeaderMain">
+          <div className="profileIdentityBlock">
+            <Avatar
+              src={profile.avatarUrl}
+              name={profile.username}
+              alt={`${profile.username} avatar`}
+              size={72}
+            />
 
-          <div>
-            <h1 style={{ margin: 0 }}>@{profile.username}</h1>
-            <p className="postDate" style={{ marginTop: "8px" }}>
-              Joined {new Date(profile.createdAt).toLocaleDateString()}
-            </p>
+            <div className="profileIdentityText">
+              <h1>@{profile.username}</h1>
+
+              <nav className="profileStats" aria-label="Profile stats">
+                <span>{profile.counts.posts} {profile.counts.posts === 1 ? "post" : "posts"}</span>
+                <Link to={`/profile/${id}/followers`}>
+                  {profile.counts.followers} {profile.counts.followers === 1 ? "follower" : "followers"}
+                </Link>
+                <Link to={`/profile/${id}/following`}>
+                  {profile.counts.following} following
+                </Link>
+              </nav>
+            </div>
           </div>
-        </div>
 
-        <div className="postFooter" style={{ marginTop: "16px" }}>
-          <span>{profile.counts.posts} posts</span>
-          <span>{profile.counts.followers} followers</span>
-          <span>{profile.counts.following} following</span>
+          <p className="profileJoinedDate">
+            Joined {new Date(profile.createdAt).toLocaleDateString()}
+          </p>
         </div>
 
         {!isOwnProfile && user && (
-          <div style={{ marginTop: "16px" }}>
+          <div className="profileFollowAction">
             <button onClick={handleToggleFollow} disabled={followLoading}>
               {followLoading ? "Updating..." : isFollowing ? "Unfollow" : "Follow"}
             </button>
@@ -159,38 +165,6 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
         {followError && <p className="formError">{followError}</p>}
       </header>
 
-      <section className="post">
-        <div style={{ width: "100%" }}>
-          <h3>Followers</h3>
-
-          {followers.length === 0 ? (
-            <p className="empty">No followers yet.</p>
-          ) : (
-            <div className="profileUserList">
-              {followers.map((follower) => (
-                <ProfileUserRow key={follower.id} person={follower} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="post">
-        <div style={{ width: "100%" }}>
-          <h3>Following</h3>
-
-          {following.length === 0 ? (
-            <p className="empty">Not following anyone yet.</p>
-          ) : (
-            <div className="profileUserList">
-              {following.map((followedUser) => (
-                <ProfileUserRow key={followedUser.id} person={followedUser} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
       <h2>Posts</h2>
 
       <Timeline
@@ -204,23 +178,6 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
         }}
       />
     </div>
-  )
-}
-
-function ProfileUserRow({ person }) {
-  return (
-    <Link to={`/profile/${person.id}`} className="profileUserRow">
-      <Avatar
-        src={person.avatarUrl}
-        name={person.username}
-        alt={`${person.username} avatar`}
-        size={48}
-      />
-
-      <div className="profileUserMeta">
-        <span className="profileUserHandle">@{person.username}</span>
-      </div>
-    </Link>
   )
 }
 
