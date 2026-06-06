@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { API_BASE_URL } from "../lib/api"
 import ProfileUserRow from "../components/profile/ProfileUserRow"
+import DemoBadge from "../components/common/DemoBadge"
 
 function ProfileConnections({ type }) {
   const { id } = useParams()
@@ -70,7 +71,12 @@ function ProfileConnections({ type }) {
       <header className="connectionsHeader">
         <div>
           <h2>{label}</h2>
-          {profile && <p>@{profile.username}</p>}
+          {profile && (
+            <p className="profileUserIdentity">
+              <span>@{profile.username}</span>
+              <DemoBadge user={profile} />
+            </p>
+          )}
         </div>
       </header>
 

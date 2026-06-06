@@ -5,6 +5,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead
 } from "../lib/api"
+import DemoBadge from "../components/common/DemoBadge"
 
 const notificationText = {
   follow: "followed you",
@@ -137,7 +138,8 @@ function Notifications({ user, onUnreadCountChange }) {
                   <p>
                     {notification.actor ? (
                       <Link to={`/profile/${notification.actor.id}`} className="notificationActor">
-                        @{notification.actor.username}
+                        <span>@{notification.actor.username}</span>
+                        <DemoBadge user={notification.actor} className="inlineDemoBadge" />
                       </Link>
                     ) : (
                       <span className="notificationActor">Someone</span>

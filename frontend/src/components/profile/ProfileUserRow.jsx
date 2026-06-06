@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import Avatar from "../common/Avatar"
+import DemoBadge from "../common/DemoBadge"
 
 function ProfileUserRow({ person }) {
   return (
@@ -12,7 +13,10 @@ function ProfileUserRow({ person }) {
       />
 
       <div className="profileUserMeta">
-        <span className="profileUserHandle">@{person.username}</span>
+        <span className="profileUserIdentity">
+          <span className="profileUserHandle">@{person.username}</span>
+          <DemoBadge user={person} />
+        </span>
       </div>
     </Link>
   )

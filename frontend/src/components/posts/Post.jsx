@@ -1,5 +1,6 @@
 import { useState } from "react"
 import Avatar from "../common/Avatar"
+import DemoBadge from "../common/DemoBadge"
 import { Link } from "react-router-dom"
 import PostComposer from "./PostComposer"
 import PostContent from "./PostContent"
@@ -74,7 +75,8 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
       <div className="postBody">
         {post.repostedBy && (
           <Link to={`/profile/${post.repostedBy.id}`} className="repostedByLine">
-            Reposted by @{post.repostedBy.username}
+            <span>Reposted by @{post.repostedBy.username}</span>
+            <DemoBadge user={post.repostedBy} className="inlineDemoBadge" />
           </Link>
         )}
 
@@ -83,6 +85,7 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
             <Link to={`/profile/${post.author?.id}`} className="postAuthorLink">
               @{post.author?.username || "unknown"}
             </Link>
+            <DemoBadge user={post.author} />
 
             <span className="postDot">·</span>
             <span className="postRelativeTime">{relative}</span>
@@ -98,7 +101,8 @@ function Post({ post, onDelete, onQuoteCreated, onRepostChange, user }) {
         {post.quotedPost ? (
           <div className="quotedPostCard">
             <Link to={`/profile/${post.quotedPost.author?.id}`} className="quotedPostAuthor">
-              @{post.quotedPost.author?.username || "unknown"}
+              <span>@{post.quotedPost.author?.username || "unknown"}</span>
+              <DemoBadge user={post.quotedPost.author} className="inlineDemoBadge" />
             </Link>
             <PostContent
               content={post.quotedPost.content}
@@ -182,6 +186,7 @@ function getRelativeTime(date) {
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
 
+  if (seconds < 0) return "now"
   if (seconds < 60) return `${seconds}s`
   if (minutes < 60) return `${minutes}m`
   if (hours < 24) return `${hours}h`

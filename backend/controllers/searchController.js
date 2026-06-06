@@ -28,7 +28,7 @@ exports.search = async (req, res) => {
     const [usersResult, postsResult, hashtagsResult] = await Promise.all([
       pool.query(
         `
-          SELECT id, username, avatar_url
+          SELECT id, username, avatar_url, is_demo, demo_label
           FROM users
           WHERE LOWER(username) LIKE $1
           ORDER BY username ASC
@@ -70,7 +70,9 @@ exports.search = async (req, res) => {
       users: usersResult.rows.map((user) => ({
         id: user.id,
         username: user.username,
-        avatarUrl: user.avatar_url
+        avatarUrl: user.avatar_url,
+        isDemo: Boolean(user.is_demo),
+        demoLabel: user.demo_label
       })),
       posts: postsResult.rows.map(mapPostRow),
       hashtags: hashtagsResult.rows.map((hashtag) => ({

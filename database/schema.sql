@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   avatar_url TEXT,
+  is_demo BOOLEAN NOT NULL DEFAULT FALSE,
+  demo_label TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

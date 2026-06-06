@@ -17,6 +17,8 @@ exports.getUserProfile = async (req, res) => {
           u.username,
           u.email,
           u.avatar_url,
+          u.is_demo,
+          u.demo_label,
           u.created_at,
           (
             SELECT COUNT(*)
@@ -51,6 +53,8 @@ exports.getUserProfile = async (req, res) => {
       username: user.username,
       email: user.email,
       avatarUrl: user.avatar_url,
+      isDemo: Boolean(user.is_demo),
+      demoLabel: user.demo_label,
       createdAt: user.created_at,
       counts: {
         posts: Number(user.post_count),
@@ -82,7 +86,9 @@ exports.getUserPosts = async (req, res) => {
             NULL::timestamp AS reposted_at,
             NULL::uuid AS reposted_by_id,
             NULL::varchar AS reposted_by_username,
-            NULL::text AS reposted_by_avatar_url
+            NULL::text AS reposted_by_avatar_url,
+            NULL::boolean AS reposted_by_is_demo,
+            NULL::text AS reposted_by_demo_label
           FROM posts p
           WHERE p.author_id = $1
             AND p.parent_post_id IS NULL
@@ -99,7 +105,9 @@ exports.getUserPosts = async (req, res) => {
             r.created_at AS reposted_at,
             repost_user.id AS reposted_by_id,
             repost_user.username AS reposted_by_username,
-            repost_user.avatar_url AS reposted_by_avatar_url
+            repost_user.avatar_url AS reposted_by_avatar_url,
+            repost_user.is_demo AS reposted_by_is_demo,
+            repost_user.demo_label AS reposted_by_demo_label
           FROM reposts r
           JOIN posts p ON p.id = r.post_id
           JOIN users repost_user ON repost_user.id = r.user_id
@@ -112,6 +120,8 @@ exports.getUserPosts = async (req, res) => {
           pt.reposted_by_id,
           pt.reposted_by_username,
           pt.reposted_by_avatar_url,
+          pt.reposted_by_is_demo,
+          pt.reposted_by_demo_label,
           ${basePostSelect(currentUserId ? "$2" : null)}
         FROM profile_timeline pt
         JOIN posts p ON p.id = pt.id
@@ -130,6 +140,8 @@ exports.getUserPosts = async (req, res) => {
           pt.reposted_by_id,
           pt.reposted_by_username,
           pt.reposted_by_avatar_url,
+          pt.reposted_by_is_demo,
+          pt.reposted_by_demo_label,
           ${basePostGroupBy}
         ORDER BY pt.timeline_created_at DESC
       `,
@@ -219,7 +231,7 @@ exports.getFollowers = async (req, res) => {
   try {
     const result = await pool.query(
       `
-        SELECT u.id, u.username, u.avatar_url, u.created_at
+        SELECT u.id, u.username, u.avatar_url, u.is_demo, u.demo_label, u.created_at
         FROM follows f
         JOIN users u ON u.id = f.follower_id
         WHERE f.following_id = $1
@@ -232,6 +244,8 @@ exports.getFollowers = async (req, res) => {
       id: row.id,
       username: row.username,
       avatarUrl: row.avatar_url,
+      isDemo: Boolean(row.is_demo),
+      demoLabel: row.demo_label,
       createdAt: row.created_at
     })))
   } catch (error) {
@@ -246,7 +260,7 @@ exports.getFollowing = async (req, res) => {
   try {
     const result = await pool.query(
       `
-        SELECT u.id, u.username, u.avatar_url, u.created_at
+        SELECT u.id, u.username, u.avatar_url, u.is_demo, u.demo_label, u.created_at
         FROM follows f
         JOIN users u ON u.id = f.following_id
         WHERE f.follower_id = $1
@@ -259,6 +273,8 @@ exports.getFollowing = async (req, res) => {
       id: row.id,
       username: row.username,
       avatarUrl: row.avatar_url,
+      isDemo: Boolean(row.is_demo),
+      demoLabel: row.demo_label,
       createdAt: row.created_at
     })))
   } catch (error) {

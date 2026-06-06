@@ -305,6 +305,26 @@ body {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
 }
 
+.demoBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgba(126, 231, 177, 0.55);
+  border-radius: 999px;
+  background: rgba(126, 231, 177, 0.12);
+  color: #9ff2c8;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.inlineDemoBadge {
+  margin-left: 6px;
+}
+
 /* Composer */
 
 .composer {
@@ -488,6 +508,8 @@ button:hover {
 
 .repostedByLine {
   display: inline-flex;
+  align-items: center;
+  gap: 2px;
   margin-bottom: 8px;
   color: #7ee7b1;
   font-size: 0.88rem;
@@ -543,6 +565,8 @@ button:hover {
   font-weight: 800;
   text-decoration: none;
   width: fit-content;
+  display: inline-flex;
+  align-items: center;
 }
 
 .quotedPostAuthor:hover {
@@ -731,6 +755,26 @@ button:hover {
   word-break: break-word;
 }
 
+.profileTitleRow,
+.profileUserIdentity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.demoProfileNote {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(126, 231, 177, 0.36);
+  border-radius: 12px;
+  background: rgba(126, 231, 177, 0.08);
+  color: #cdeedd;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .profileStats {
   display: flex;
   align-items: center;
@@ -900,6 +944,8 @@ button:hover {
 }
 
 .notificationActor {
+  display: inline-flex;
+  align-items: center;
   color: #f5f9ff;
   font-weight: 900;
   text-decoration: none;

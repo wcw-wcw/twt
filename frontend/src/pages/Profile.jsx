@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import Timeline from "../components/posts/Timeline"
 import Avatar from "../components/common/Avatar"
+import DemoBadge from "../components/common/DemoBadge"
 import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
 function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
@@ -17,6 +18,7 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
 
   const isOwnProfile = user?.id === id
   const currentUserId = user?.id
+  const showDemoLabel = profile?.demoLabel && profile.demoLabel !== "Simulated demo account"
 
   const isFollowing = useMemo(() => {
     if (!user) return false
@@ -129,7 +131,10 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
             />
 
             <div className="profileIdentityText">
-              <h1>@{profile.username}</h1>
+              <div className="profileTitleRow">
+                <h1>@{profile.username}</h1>
+                <DemoBadge user={profile} />
+              </div>
 
               <nav className="profileStats" aria-label="Profile stats">
                 <span>{profile.counts.posts} {profile.counts.posts === 1 ? "post" : "posts"}</span>
@@ -163,6 +168,13 @@ function Profile({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
         )}
 
         {followError && <p className="formError">{followError}</p>}
+
+        {profile.isDemo && (
+          <p className="demoProfileNote">
+            This is a simulated demo account used to showcase the app.
+            {showDemoLabel ? ` ${profile.demoLabel}.` : ""}
+          </p>
+        )}
       </header>
 
       <h2>Posts</h2>

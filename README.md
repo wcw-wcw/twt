@@ -15,6 +15,7 @@ This app deploys to Vercel as a Vite static frontend plus an Express API mounted
 - Quote posts with a compact preview of the referenced post
 - Simple reposts with per-post counts and undo support
 - In-app notifications for follows, replies, mentions, quote posts, and reposts
+- Clearly labeled simulated demo community seed data for portfolio presentations
 - Profile pages with user statistics, following/followers, and top-level posts
 - Following/unfollowing of other users
 - First-pass discovery with clickable @mentions, #hashtags, search, and hashtag pages
@@ -56,6 +57,34 @@ Supported notification types are:
 - `repost`
 
 Notifications are private to the recipient. The backend requires JWT auth for notification routes and only returns or updates notifications owned by the current user. This pass is in-app only; realtime WebSocket updates, email, SMS, and push notifications are future enhancements.
+
+## Demo Community
+
+The app includes an optional demo community seed for portfolio presentations. Demo accounts are simulated/sample accounts only. They are marked in the database with `is_demo = true`, use `demo_label = 'Simulated demo account'`, and render with a visible `Demo` badge in the UI.
+
+The demo system does not automate, post to, scrape, or interact with Twitter/X or any external social platform. It only inserts local sample rows into this app's configured PostgreSQL database.
+
+Run the demo-account migration before seeding an existing database:
+
+```sh
+psql "$DATABASE_URL" -f database/migrations/006_demo_accounts.sql
+```
+
+Seed the demo community:
+
+```sh
+npm run seed:demo --prefix backend
+```
+
+The seed is deterministic and idempotent. Running it more than once finds the same demo users, posts, follows, replies, quote posts, reposts, mentions, hashtags, and demo-to-demo notifications instead of duplicating them. Demo users are display accounts with random unusable passwords, so there are no documented demo login credentials.
+
+To remove the seeded community:
+
+```sh
+npm run seed:demo:clear --prefix backend
+```
+
+The cleanup script deletes only seeded demo users with `is_demo = true` and `demo_%` usernames. Existing real users are not deleted.
 
 ## Local development
 
@@ -107,16 +136,17 @@ psql "$DATABASE_URL" -f database/migrations/002_quote_posts.sql
 psql "$DATABASE_URL" -f database/migrations/003_reposts.sql
 psql "$DATABASE_URL" -f database/migrations/004_discovery.sql
 psql "$DATABASE_URL" -f database/migrations/005_notifications.sql
+psql "$DATABASE_URL" -f database/migrations/006_demo_accounts.sql
 ```
 
-The replies and quote-post migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts, discovery, and notifications migrations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
+The replies, quote-post, and demo-account migrations use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, so they are safe to run against databases that may already have those columns. The reposts, discovery, and notifications migrations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
 
 If API smoke tests create temporary `discover_*` or notification smoke-test users/posts in your configured database, they are test data. You can optionally remove those rows after testing with targeted deletes for the specific test usernames you created.
 
 ## Vercel deployment
 
 1. Create a hosted Postgres database. Neon is the simplest fit with Vercel because it has a Vercel Marketplace integration and a free tier.
-2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, `database/migrations/004_discovery.sql`, and `database/migrations/005_notifications.sql` against an existing hosted database.
+2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, `database/migrations/004_discovery.sql`, `database/migrations/005_notifications.sql`, and `database/migrations/006_demo_accounts.sql` against an existing hosted database.
 3. Import this repository into Vercel.
 4. Add these Vercel environment variables:
 

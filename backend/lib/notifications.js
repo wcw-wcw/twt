@@ -16,7 +16,9 @@ const mapNotificationRow = (row) => ({
   actor: row.actor_user_id ? {
     id: row.actor_user_id,
     username: row.actor_username,
-    avatarUrl: row.actor_avatar_url
+    avatarUrl: row.actor_avatar_url,
+    isDemo: Boolean(row.actor_is_demo),
+    demoLabel: row.actor_demo_label
   } : null,
   postId: row.post_id,
   sourcePostId: row.source_post_id
@@ -90,7 +92,9 @@ const getNotificationsForUser = async (userId) => {
         n.created_at,
         actor.id AS actor_user_id,
         actor.username AS actor_username,
-        actor.avatar_url AS actor_avatar_url
+        actor.avatar_url AS actor_avatar_url,
+        actor.is_demo AS actor_is_demo,
+        actor.demo_label AS actor_demo_label
       FROM notifications n
       LEFT JOIN users actor ON actor.id = n.actor_user_id
       WHERE n.recipient_user_id = $1

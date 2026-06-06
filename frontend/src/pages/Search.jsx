@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom"
 
 import Timeline from "../components/posts/Timeline"
 import Avatar from "../components/common/Avatar"
+import DemoBadge from "../components/common/DemoBadge"
 import { API_BASE_URL, getAuthHeaders } from "../lib/api"
 
 function Search({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
@@ -73,7 +74,10 @@ function Search({ user, onDeletePost, onQuoteCreated, onRepostChange }) {
                   alt={`${resultUser.username} avatar`}
                   size={42}
                 />
-                <span className="profileUserHandle">@{resultUser.username}</span>
+                <span className="profileUserIdentity">
+                  <span className="profileUserHandle">@{resultUser.username}</span>
+                  <DemoBadge user={resultUser} />
+                </span>
               </Link>
             ))}
           </div>

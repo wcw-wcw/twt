@@ -15,7 +15,9 @@ const mapPostRow = (row) => ({
   repostedBy: row.reposted_by_id ? {
     id: row.reposted_by_id,
     username: row.reposted_by_username,
-    avatarUrl: row.reposted_by_avatar_url
+    avatarUrl: row.reposted_by_avatar_url,
+    isDemo: Boolean(row.reposted_by_is_demo),
+    demoLabel: row.reposted_by_demo_label
   } : null,
   quotedPost: row.quoted_post_id ? {
     id: row.quoted_post_id,
@@ -26,13 +28,17 @@ const mapPostRow = (row) => ({
     author: {
       id: row.quoted_author_id,
       username: row.quoted_username,
-      avatarUrl: row.quoted_avatar_url
+      avatarUrl: row.quoted_avatar_url,
+      isDemo: Boolean(row.quoted_is_demo),
+      demoLabel: row.quoted_demo_label
     }
   } : null,
   author: {
     id: row.author_id,
     username: row.username,
-    avatarUrl: row.avatar_url
+    avatarUrl: row.avatar_url,
+    isDemo: Boolean(row.is_demo),
+    demoLabel: row.demo_label
   }
 })
 
@@ -43,7 +49,9 @@ const metadataSelect = (postAlias, mentionAlias, hashtagAlias) => `
         json_build_object(
           'id', mentioned_user.id,
           'username', mentioned_user.username,
-          'avatarUrl', mentioned_user.avatar_url
+          'avatarUrl', mentioned_user.avatar_url,
+          'isDemo', mentioned_user.is_demo,
+          'demoLabel', mentioned_user.demo_label
         )
         ORDER BY LOWER(mentioned_user.username)
       ),
@@ -94,13 +102,17 @@ const basePostSelect = (currentUserParam = null) => `
   u.id AS author_id,
   u.username,
   u.avatar_url,
+  u.is_demo,
+  u.demo_label,
   quoted.id AS quoted_post_id,
   quoted.content AS quoted_content,
   quoted.created_at AS quoted_created_at,
   ${metadataSelect("quoted", "quoted_mentioned_users", "quoted_hashtags")},
   quoted_user.id AS quoted_author_id,
   quoted_user.username AS quoted_username,
-  quoted_user.avatar_url AS quoted_avatar_url
+  quoted_user.avatar_url AS quoted_avatar_url,
+  quoted_user.is_demo AS quoted_is_demo,
+  quoted_user.demo_label AS quoted_demo_label
 `
 
 const basePostJoins = `
