@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "demo:generate": "node scripts/generate-demo-content-ollama.js",
     "seed:demo": "node scripts/seed-demo-community.js",
     "seed:demo:clear": "node scripts/clear-demo-community.js",
     "test": "echo \"Error: no test specified\" && exit 1"

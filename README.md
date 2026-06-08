@@ -86,6 +86,45 @@ npm run seed:demo:clear --prefix backend
 
 The cleanup script deletes only seeded demo users with `is_demo = true` and `demo_%` usernames. Existing real users are not deleted.
 
+## Optional Ollama Demo Generator
+
+The deterministic demo seed remains the recommended default demo setup. For a local-only enhancement, the backend also includes an optional Ollama-powered generator that can add extra simulated demo posts, replies, quote posts, and reposts from the command line.
+
+This generator is manual and local-only. It uses the local Ollama HTTP API, does not require an Ollama cloud account, does not run with the backend server, and does not interact with Twitter/X or any external social platform. Generated users and content are simulated demo data only, and the script only uses existing `is_demo = true` users and demo-authored target posts.
+
+Install and start Ollama locally, then pull or make available a local model such as `llama3.2`. Run the deterministic seed first so demo users and target posts exist:
+
+```sh
+npm run seed:demo --prefix backend
+```
+
+Preview a batch without inserting rows:
+
+```sh
+npm run demo:generate --prefix backend -- --dry-run --limit 5
+```
+
+Insert a small validated batch:
+
+```sh
+npm run demo:generate --prefix backend -- --limit 5
+```
+
+Run continuously until Ctrl+C:
+
+```sh
+npm run demo:generate --prefix backend -- --loop --interval-ms 30000
+```
+
+Configuration is available through CLI flags or environment variables:
+
+```sh
+OLLAMA_BASE_URL="http://localhost:11434"
+OLLAMA_MODEL="llama3.2"
+```
+
+Equivalent flags are `--base-url` and `--model`. The script requests JSON from Ollama, validates every generated item before insertion, rejects real-user mentions, rejects non-demo authors or targets, rejects overlong and risky financial content, and skips invalid items while allowing the rest of a valid batch to proceed. Valid generated replies, quote posts, reposts, and mentions can create demo-to-demo notifications only; the generator refuses non-demo notification recipients.
+
 ## Local development
 
 1. Create `backend/.env` with your local database settings:
