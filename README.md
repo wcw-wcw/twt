@@ -92,7 +92,7 @@ The deterministic demo seed remains the recommended default demo setup. For a lo
 
 This generator is manual and local-only. It uses the local Ollama HTTP API, does not require an Ollama cloud account, does not run with the backend server, and does not interact with Twitter/X or any external social platform. Generated users and content are simulated demo data only, and the script only uses existing `is_demo = true` users and demo-authored target posts.
 
-Install and start Ollama locally, then pull or make available a local model such as `llama3.2`. Run the deterministic seed first so demo users and target posts exist:
+Install and start Ollama locally, then pull or make available the default local model, `llama3.2:3b`. Run the deterministic seed first so demo users and target posts exist:
 
 ```sh
 npm run seed:demo --prefix backend
@@ -120,14 +120,14 @@ Configuration is available through CLI flags or environment variables:
 
 ```sh
 OLLAMA_BASE_URL="http://localhost:11434"
-OLLAMA_MODEL="llama3.2"
+OLLAMA_MODEL="llama3.2:3b"
 ```
 
 Equivalent flags are `--base-url` and `--model`. The script requests JSON from Ollama, validates every generated item before insertion, rejects real-user mentions, rejects non-demo authors or targets, rejects overlong and risky financial content, and skips invalid items while allowing the rest of a valid batch to proceed. Valid generated replies, quote posts, reposts, and mentions can create demo-to-demo notifications only; the generator refuses non-demo notification recipients.
 
-## Local development
+## Local Development Setup
 
-1. Create `backend/.env` with your local database settings:
+1. Create `backend/.env` with your local database settings. Keep this file local; it is ignored by git and should never be committed.
 
    ```sh
    DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/DB"
@@ -145,11 +145,11 @@ Equivalent flags are `--base-url` and `--model`. The script requests JSON from O
    DB_PORT="5432"
    ```
 
-2. Install dependencies:
+2. Install backend and frontend dependencies. The repository tracks `package.json` and `package-lock.json`; it does not track `node_modules`.
 
    ```sh
-   npm install --prefix frontend
    npm install --prefix backend
+   npm install --prefix frontend
    ```
 
 3. Create the database tables:
@@ -158,7 +158,21 @@ Equivalent flags are `--base-url` and `--model`. The script requests JSON from O
    psql "$DATABASE_URL" -f database/schema.sql
    ```
 
-4. Start both apps:
+4. For an existing database, apply all migrations listed in the next section instead of recreating the schema.
+
+5. Optionally seed deterministic demo data:
+
+   ```sh
+   npm run seed:demo --prefix backend
+   ```
+
+6. Optionally preview local Ollama-generated demo content without inserting rows:
+
+   ```sh
+   npm run demo:generate --prefix backend -- --dry-run --limit 3 --model llama3.2:3b
+   ```
+
+7. Start both apps:
 
    ```sh
    npm run dev --prefix frontend
@@ -182,7 +196,19 @@ The replies, quote-post, and demo-account migrations use `ALTER TABLE ... ADD CO
 
 If API smoke tests create temporary `discover_*` or notification smoke-test users/posts in your configured database, they are test data. You can optionally remove those rows after testing with targeted deletes for the specific test usernames you created.
 
-## Vercel deployment
+## Deployment Notes
+
+Before deploying, confirm repository hygiene:
+
+- `node_modules`, `.env` files, local logs, build outputs, database dumps, and generated artifacts are ignored and should not be committed.
+- `backend/.env.example` should contain placeholders only.
+- `backend/package.json`, `backend/package-lock.json`, `frontend/package.json`, and `frontend/package-lock.json` should remain tracked.
+- Run `npm install --prefix backend` and `npm install --prefix frontend` from clean manifests to restore dependencies.
+- Run `npm run build --prefix frontend`, `npm run lint --prefix frontend`, and `node -e "require('./backend/server')"` before production deployment.
+- Run `npm audit --prefix backend` and `npm audit --prefix frontend`; address high or critical findings before deploying when practical.
+- Run a secret scan over tracked files before committing changes.
+
+For Vercel and Neon:
 
 1. Create a hosted Postgres database. Neon is the simplest fit with Vercel because it has a Vercel Marketplace integration and a free tier.
 2. Run `database/schema.sql` against a new hosted database, or run `database/migrations/001_post_replies.sql`, `database/migrations/002_quote_posts.sql`, `database/migrations/003_reposts.sql`, `database/migrations/004_discovery.sql`, `database/migrations/005_notifications.sql`, and `database/migrations/006_demo_accounts.sql` against an existing hosted database.
@@ -197,3 +223,4 @@ If API smoke tests create temporary `discover_*` or notification smoke-test user
    ```
 
 5. Deploy. The frontend will call the backend at the same Vercel domain under `/api`.
+6. Do not configure or run the optional Ollama generator in Vercel. It is a manual local-only helper for demo content.

@@ -10,7 +10,7 @@ const MAX_POST_LENGTH = 280
 const DEFAULT_LIMIT = 10
 const DEFAULT_INTERVAL_MS = 30000
 const DEFAULT_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434"
-const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "llama3.2"
+const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "llama3.2:3b"
 const VALID_TYPES = new Set(["post", "reply", "quote", "repost"])
 
 const FINANCIAL_RISK_PATTERN = /\b(buy|sell|trade|short|long|invest|investment|gamble|bet|wager|crypto|token|coin|forex|options?|calls?|puts?|pump|moon|guaranteed returns?|financial advice)\b/i
