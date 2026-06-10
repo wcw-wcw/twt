@@ -42,3 +42,6 @@ lerna-debug.log*
 
 # Vercel local state
 .vercel/
+
+# Personal local documentation
+docs/ARCHITECTURE.md

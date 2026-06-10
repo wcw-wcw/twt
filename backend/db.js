@@ -6,6 +6,8 @@ const useSsl =
   process.env.NODE_ENV === "production" ||
   process.env.DATABASE_URL?.includes("sslmode=require")
 
+// Hosted Postgres providers such as Neon commonly require SSL, while local
+// development usually does not. The pool keeps both paths behind env config.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   user: process.env.DB_USER,

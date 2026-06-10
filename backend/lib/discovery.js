@@ -32,6 +32,8 @@ const savePostDiscovery = async (client, postId, content) => {
   const mentionedUsers = []
 
   if (mentions.length > 0) {
+    // Mentions resolve existing users only. Unknown @text stays display text
+    // and does not create rows or notifications.
     const usersResult = await client.query(
       `
         SELECT id, username
@@ -55,6 +57,7 @@ const savePostDiscovery = async (client, postId, content) => {
   }
 
   for (const tag of hashtags) {
+    // Hashtags are canonicalized lowercase so /hashtag/:tag can be exact-match.
     const hashtagResult = await client.query(
       `
         INSERT INTO hashtags (tag)

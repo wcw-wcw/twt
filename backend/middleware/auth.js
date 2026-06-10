@@ -38,6 +38,8 @@ requireAuth.optional = (req, res, next) => {
       id: decoded.userId
     }
   } catch (error) {
+    // Optional auth lets public timelines render even with a stale local token;
+    // protected routes still use requireAuth and reject invalid credentials.
     req.user = null
   }
 

@@ -230,6 +230,8 @@ const loadRecentDemoContent = async () => {
 }
 
 const chooseTargetPost = (recentPosts, authorId, offset) => {
+  // The model gives only a hint; the script chooses a concrete demo-authored
+  // target so generated content never controls raw database IDs.
   const candidates = recentPosts.filter((post) => post.author_id !== authorId)
   const usable = candidates.length > 0 ? candidates : recentPosts
   if (usable.length === 0) return null

@@ -78,6 +78,9 @@ const metadataSelect = (postAlias, mentionAlias, hashtagAlias) => `
   ) AS ${hashtagAlias}
 `
 
+// Controllers reuse this SQL fragment so timelines, profiles, search, threads,
+// and hashtag pages return the same post shape. Only fixed alias/parameter
+// strings are passed in; user input remains parameterized by each caller.
 const basePostSelect = (currentUserParam = null) => `
   p.id,
   p.content,

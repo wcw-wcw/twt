@@ -39,6 +39,8 @@ const createNotification = async (client, {
     throw new Error(`Unsupported notification type: ${type}`)
   }
 
+  // Partial unique indexes dedupe follow/repost notifications. Other types may
+  // repeat because separate replies, quotes, and mentions can target the same post.
   const result = await client.query(
     `
       INSERT INTO notifications (
